@@ -76,14 +76,14 @@ jobs:
             echo "Waiting for MySQL..."
             sleep 2
           done
-
-      # .env 환경 구성
-      - name: Set environment variables
-        run: |
-          echo "DATABASE_URL=mysql+pymysql://root:1234@127.0.0.1:$3306/test" >> $GITHUB_ENV
-
-        env:
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_PORT: 3306
+#
+#      # .env 환경 구성
+#      - name: Set environment variables
+#        run: |
+#          echo "DATABASE_URL=mysql+pymysql://root:1234@127.0.0.1:$3306/test" >> $GITHUB_ENV
+#
+#        env:
+#          DB_USER: ${{ secrets.DB_USER }}
+#          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+#          DB_NAME: ${{ secrets.DB_NAME }}
+#          DB_PORT: 3306
