@@ -8,7 +8,7 @@ TORTOISE_APP_MODELS: list[str] = [
     "aerich.models",
     "app.models.user",
     "app.models.token_blacklist",
-    "app.models.RSO_user"
+    "app.models.RSO_user",
 ]
 
 TORTOISE_ORM = {
