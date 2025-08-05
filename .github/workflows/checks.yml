@@ -24,8 +24,8 @@ jobs:
         # Github Secrets에서 가져와서 env로 등록, MySQL 데이터베이스 연결 설정
         env:
           MYSQL_DATABASE: ${{ secrets.DB_NAME }}
-          MYSQL_USER: ${{ secrets.DB_USER }}
-          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
+#          MYSQL_USER: ${{ secrets.DB_USER }}
+#          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
           MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
         # 옵션으로 MySQL의 연결 상태를 확인. 10초 단위로 5번 재시도. 5초간 기다림.
         options: >-
