@@ -18,7 +18,7 @@ class UserModel(models.Model):
     google_or_kakao = fields.CharEnumField(
         Social, null=False, description="소셜 계정 정보"
     )
-    likes = fields.IntField(description="좋아요")
+    likes = fields.IntField(default=0 , description="좋아요")
     created_at = fields.DatetimeField(auto_now=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
