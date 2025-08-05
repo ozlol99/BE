@@ -20,6 +20,7 @@ dependencies = [
     "uvicorn>=0.35.0",
     "aiomysql>=0.2.0",
     "isort>=5.13.2",
+    "cryptography>=45.0.5",
 ]
 
 [tool.setuptools]
