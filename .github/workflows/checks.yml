@@ -24,8 +24,6 @@ jobs:
         # Github Secrets에서 가져와서 env로 등록, MySQL 데이터베이스 연결 설정
         env:
           MYSQL_DATABASE: test
-          MYSQL_USER: root
-          MYSQL_PASSWORD: 1234
           MYSQL_ROOT_PASSWORD: 1234
         # 옵션으로 MySQL의 연결 상태를 확인. 10초 단위로 5번 재시도. 5초간 기다림.
         options: >-
