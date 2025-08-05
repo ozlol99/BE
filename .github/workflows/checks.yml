@@ -29,12 +29,11 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
         # 옵션으로 MySQL의 연결 상태를 확인. 10초 단위로 5번 재시도. 5초간 기다림.
         options: >-
-          --health-cmd "mysqladmin ping -h localhost"
+          --health-cmd "mysql -h 127.0.0.1 -e 'SELECT 1'"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
           --health-start-period 30s
-
     steps:
       # CI 환경에서 코드를 체크아웃합니다.
       - name: Checkout code
