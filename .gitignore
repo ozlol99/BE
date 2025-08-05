@@ -306,7 +306,9 @@ build
 lol99.egg-info
 
 .dockerignore
-.docker-compose.yml
-.Dockerfile
+docker-compose.yml
+Dockerfile
 
+
+migrations
 
