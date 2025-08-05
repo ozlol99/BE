@@ -24,8 +24,4 @@ RUN uv pip install -r pyproject.toml --system
 # 소스 코드 복사
 COPY . .
 
-# FastAPI 앱 실행
-#CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-#test.sh
 CMD ["bash", "./run.sh"]
