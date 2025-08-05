@@ -33,6 +33,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          --health-start-period 30s # 30초의 여유 시간을 줍니다.
 
     steps:
       # CI 환경에서 코드를 체크아웃합니다.
