@@ -1,4 +1,7 @@
-import os, dotenv, requests
+import os
+
+import dotenv
+import requests
 from fastapi import HTTPException
 
 dotenv.load_dotenv()
@@ -7,11 +10,9 @@ KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
 REDIRECT_URI = "http://127.0.0.1:8000/kakao-login"
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
 
+
 # 2. 토큰 요청 함수 (인가 코드를 인자로 받음)
 def request_kakao_token(code: str):
-    """
-    주어진 인가 코드를 이용해 카카오 토큰 서버에 토큰을 요청합니다.
-    """
     KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
     KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
     REDIRECT_URI = "http://127.0.0.1:8000/kakao-login"
@@ -44,11 +45,10 @@ def request_kakao_token(code: str):
         print(f"토큰 요청 중 오류 발생: {e}")
         raise HTTPException(status_code=500, detail="토큰 발급 실패")
 
+
 def get_kakao_profile(access_token):
     url = "https://kapi.kakao.com/v2/user/me"
-    headers = {
-        "Authorization": f"Bearer {access_token}"
-    }
+    headers = {"Authorization": f"Bearer {access_token}"}
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()  # HTTP 오류 발생 시 예외 발생
