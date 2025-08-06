@@ -6,15 +6,10 @@ from fastapi import HTTPException
 
 dotenv.load_dotenv()
 
-KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
-REDIRECT_URI = "http://127.0.0.1:8000/kakao-login"
-KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
-
-
 # 2. 토큰 요청 함수 (인가 코드를 인자로 받음)
 def request_kakao_token(code: str):
     KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
-    KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
+    KAKAO_REST_API_KEY = os.getenv("a04159cc219d093bdcde9d55ea4b88fc")
     REDIRECT_URI = "http://127.0.0.1:8000/kakao-login"
 
     data = {
