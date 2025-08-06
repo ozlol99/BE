@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 class RefreshTokenModel(models.Model):
     id = fields.IntField(pk=True)
     user: fields.ForeignKeyRelation[UserModel] = fields.ForeignKeyField(
-        "models.UserModel", related_name="refresh_tokens"
+        "models.UserModel", related_name="refresh_tokens", source_field="user_id"
     )
     token = fields.CharField(max_length=512, unique=True, null=False)
     expires_at = fields.DatetimeField(auto_now=True)

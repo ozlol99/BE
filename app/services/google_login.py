@@ -85,5 +85,5 @@ async def create_refresh_token(user: UserModel):
         "exp": datetime.utcnow() + refresh_token_expires,
     }
     refresh_token = jwt.encode(refresh_token_payload, SECRET_KEY, algorithm=ALGORITHM)
-    await RefreshTokenModel.create(user_id=user, token=refresh_token)
+    await RefreshTokenModel.create(user=user, token=refresh_token)
     return refresh_token
