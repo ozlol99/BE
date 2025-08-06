@@ -1,12 +1,14 @@
 import os
-from typing import Dict, Any
+from typing import Any, Dict
+
 import httpx
 from fastapi import HTTPException, status
-from jose import jwt, JWTError
+from jose import JWTError, jwt
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI")
+
 
 async def get_google_user(code: str) -> Dict[str, Any]:
     token_url = "https://oauth2.googleapis.com/token"
@@ -34,13 +36,15 @@ async def get_google_user(code: str) -> Dict[str, Any]:
         try:
             # Get Google's public keys
             async with httpx.AsyncClient() as client:
-                jwks_response = await client.get("https://www.googleapis.com/oauth2/v3/certs")
+                jwks_response = await client.get(
+                    "https://www.googleapis.com/oauth2/v3/certs"
+                )
                 jwks = jwks_response.json()
 
             header = jwt.get_unverified_header(id_token)
             key = [k for k in jwks["keys"] if k["kid"] == header["kid"]][0]
 
-            user_info = jwt.decode(
+            user_info: Dict[str, Any] = jwt.decode(
                 id_token,
                 key=key,
                 algorithms=["RS256"],

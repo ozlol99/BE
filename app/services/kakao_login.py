@@ -6,6 +6,7 @@ from fastapi import HTTPException
 
 dotenv.load_dotenv()
 
+
 # 2. 토큰 요청 함수 (인가 코드를 인자로 받음)
 def request_kakao_token(code: str):
     KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"

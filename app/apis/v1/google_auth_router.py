@@ -1,16 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from app.services.google_login import get_google_user
-from app.models.user import UserModel, Social
-from jose import jwt
-from datetime import datetime, timedelta
-from fastapi.responses import RedirectResponse
 import os
+from datetime import datetime, timedelta
+
+from fastapi import APIRouter, HTTPException, status
+from fastapi.responses import RedirectResponse
+from jose import jwt
+
+from app.models.user import Social, UserModel
+from app.services.google_login import get_google_user
 
 router = APIRouter(prefix="/social-google", tags=["google-login"])
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
 
 @router.get("", description="구글 로그인창으로 넘기기")
 def start_google_login():
@@ -42,5 +45,8 @@ async def google_oauth_callback(code: str):
         "exp": datetime.now() + access_token_expires,
     }
     access_token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return {"access_token": access_token, "token_type": "bearer"}, {"user_info": user_info}, {"data": code }
-
+    return (
+        {"access_token": access_token, "token_type": "bearer"},
+        {"user_info": user_info},
+        {"data": code},
+    )
