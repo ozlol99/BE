@@ -1,10 +1,10 @@
 import os
 from datetime import datetime, timedelta
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 import requests
 from fastapi import HTTPException, status
-from jose import JWTError, jwt
+from jose import jwt
 
 from app.models.refresh_token import RefreshTokenModel
 from app.models.user import Social, UserModel
@@ -34,7 +34,7 @@ def request_google_token(code: str) -> Dict[str, Any]:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to fetch token from Google: {response.json()}",
         )
-    return response.json()
+    return cast(Dict[str, Any], response.json())
 
 
 def get_google_profile(access_token: str) -> str:
@@ -47,7 +47,7 @@ def get_google_profile(access_token: str) -> str:
             detail=f"Failed to fetch user info from Google: {response.json()}",
         )
     user_info = response.json()
-    return user_info["email"]
+    return cast(str, user_info["email"])
 
 
 async def get_or_create_google_user(email: str) -> UserModel:
@@ -84,8 +84,6 @@ async def create_refresh_token(user: UserModel):
         "sub": str(user.id),
         "exp": datetime.utcnow() + refresh_token_expires,
     }
-    refresh_token = jwt.encode(
-        refresh_token_payload, SECRET_KEY, algorithm=ALGORITHM
-    )
+    refresh_token = jwt.encode(refresh_token_payload, SECRET_KEY, algorithm=ALGORITHM)
     await RefreshTokenModel.create(user_id=user, token=refresh_token)
     return refresh_token

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Response
+
 from app.services.google_login import (
     create_access_token,
     create_refresh_token,
@@ -8,6 +9,7 @@ from app.services.google_login import (
 )
 
 router = APIRouter(prefix="/social-google", tags=["google-login"])
+
 
 @router.get("/callback", description="Auth-Code")
 async def google_auth(code: str, response: Response):

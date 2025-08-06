@@ -60,6 +60,7 @@ warn_unused_configs = true
 ignore_missing_imports = true
 explicit_package_bases = true
 plugins = ["pydantic.mypy"]
+exclude = ["build", "migrations", "venv", ".venv"]
 
 [[tool.mypy.overrides]]
 module = "app.*"
