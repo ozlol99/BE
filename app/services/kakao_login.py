@@ -10,6 +10,7 @@ KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
 REDIRECT_URI = "http://127.0.0.1:8000/kakao-login"
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
 
+
 # 2. 토큰 요청 함수 (인가 코드를 인자로 받음)
 def request_kakao_token(code: str):
 
@@ -48,7 +49,7 @@ def get_kakao_profile(access_token):
         response.raise_for_status()  # HTTP 오류 발생 시 예외 발생
         user_info = response.json()
         print(f"email: {user_info}")
-        return user_info['kakao_account']['email']
+        return user_info["kakao_account"]["email"]
 
     except requests.exceptions.RequestException as e:
         print(f"API 호출 중 오류 발생: {e}")

@@ -8,6 +8,7 @@ router = APIRouter(prefix="/kakao-login", tags=["kakao-login"])
 
 BASE_URL = "http://localhost:8000"
 
+
 @router.get("", description="Auth-Code")
 async def kakao_auth(code: str):
     token_info = request_kakao_token(code)
@@ -21,5 +22,6 @@ async def kakao_auth(code: str):
     else:
         redirection_url = f"{BASE_URL}/register?email={email}&google_or_kakao=kakao"
         return RedirectResponse(redirection_url)
+
 
 # https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a04159cc219d093bdcde9d55ea4b88fc&redirect_uri=http://127.0.0.1:8000/kakao-login
