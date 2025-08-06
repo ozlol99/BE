@@ -8,7 +8,7 @@ router = APIRouter(prefix="/user", tags=["user"])
 
 
 @router.post("/register", description="register")
-async def regisetr_user(user_data: UserDTO, email, google_or_kakao):
+async def register_user(user_data: UserDTO, email, google_or_kakao):
     try:
         new_user = await UserModel.create(
             email=email,

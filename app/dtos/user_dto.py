@@ -12,3 +12,8 @@ class UserDTO(BaseModel):
     )
     gender: Optional[bool] = Field(None, description="성별 (true: 남성, false: 여성)")
     birthday: Optional[datetime] = Field(None, description="생년월일")
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
