@@ -9,14 +9,11 @@ WORKDIR /app
 # uv 설치 (Rust 기반이지만 바이너리 제공됨)
 RUN pip install uv
 
-#aerich migrate
-
-
-
 
 # 의존성 정보 복사
 COPY pyproject.toml .
 COPY uv.lock .
+
 
 # 의존성 설치
 RUN uv pip install -r pyproject.toml --system

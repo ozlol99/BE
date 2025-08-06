@@ -10,12 +10,8 @@ KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
 REDIRECT_URI = "http://127.0.0.1:8000/kakao-login"
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
 
-
 # 2. 토큰 요청 함수 (인가 코드를 인자로 받음)
 def request_kakao_token(code: str):
-    KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
-    KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
-    REDIRECT_URI = "http://127.0.0.1:8000/kakao-login"
 
     data = {
         "grant_type": "authorization_code",
@@ -28,10 +24,8 @@ def request_kakao_token(code: str):
         response = requests.post(KAKAO_TOKEN_URL, data=data)
         response.raise_for_status()  # HTTP 오류 발생 시 예외 발생
 
-        # 응답 본문을 JSON에서 Python 딕셔너리로 변환
-        token_info = response.json()
+        token_info = response.json()  # 응답 본문을 JSON에서 Python 딕셔너리로 변환
 
-        # 각 변수에 잘 담겼는지 확인합니다. (디버깅용)
         print("Access Token:", token_info["access_token"])
         print("Token Type:", token_info["token_type"])
         print("Refresh Token:", token_info["refresh_token"])
@@ -53,8 +47,8 @@ def get_kakao_profile(access_token):
         response = requests.get(url, headers=headers)
         response.raise_for_status()  # HTTP 오류 발생 시 예외 발생
         user_info = response.json()
-        print(f"email{user_info['email']}")
-        return user_info
+        print(f"email: {user_info}")
+        return user_info['kakao_account']['email']
 
     except requests.exceptions.RequestException as e:
         print(f"API 호출 중 오류 발생: {e}")

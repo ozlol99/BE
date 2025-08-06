@@ -1,5 +1,4 @@
 from tortoise import fields, models
-
 from app.models.user import UserModel  # User 모델 임포트
 
 
