@@ -1,5 +1,6 @@
 services:
   lol99: # Project name
+    container_name: lol99
     build:
       context: .
       dockerfile: Dockerfile

@@ -310,6 +310,7 @@ docker-compose.yml
 Dockerfile
 
 .idea
+.migrations
 
 
 

@@ -39,6 +39,13 @@ src_folder = "./."
 [tool.ruff]
 line-length = 88
 fix = true
+exclude = [
+    "migrations/",
+    "tests/", # 테스트 디렉토리도 보통 제외합니다.
+    "venv/",
+    ".venv/",
+    "__pypackages__/",
+]
 
 [tool.ruff.lint]
 select = ["I", "E", "F", "W"]
