@@ -22,6 +22,10 @@ dependencies = [
     "isort>=5.13.2",
     "cryptography>=45.0.5",
     "types-requests>=2.32.4.20250611",
+    "asyncpg>=0.30.0",
+    "python-jose>=3.3.0",
+    "python-dotenv>=1.0.0",
+    "python-jose>=3.5.0",
 ]
 
 [tool.setuptools]
@@ -56,6 +60,7 @@ warn_unused_configs = true
 ignore_missing_imports = true
 explicit_package_bases = true
 plugins = ["pydantic.mypy"]
+exclude = ["build", "migrations", "venv", ".venv"]
 
 [[tool.mypy.overrides]]
 module = "app.*"

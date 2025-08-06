@@ -11,7 +11,7 @@ class Social(str, Enum):
 class UserModel(models.Model):
     id = fields.IntField(pk=True, auto_create=True)
     email = fields.CharField(unique=True, max_length=255, description="이메일")
-    user = fields.CharField(unique=True, max_length=255, description="닉네임")
+    user = fields.CharField(null=True, max_length=255, description="닉네임")
     gender = fields.IntField(null=True, description="성별 (null 가능)")
     birthday = fields.DateField(null=True, description="생년월일 (null 가능)")
     riot_user = fields.CharField(
