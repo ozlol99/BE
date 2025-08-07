@@ -1,11 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from tortoise.exceptions import IntegrityError
-
-from app.dtos.user_dto import UserDTO
+from app.dtos.user_dto import UserDTO, UserUpdate
 from app.models.user import UserModel  # 🚨 UserModel 모델을 import
 from app.services.social_unlink import unlink_social_account
-router = APIRouter(prefix="/user", tags=["user"])
+from app.services.token_service import get_current_user
 
+router = APIRouter(prefix="/user", tags=["user"])
 
 @router.post("/register", description="register")
 async def register_user(user_data: UserDTO, email, google_or_kakao):
@@ -39,15 +39,11 @@ async def get_my_info(current_user: UserModel = Depends(get_current_user)):
         "likes": current_user.likes,
     }
 
-
 @router.patch("/me")
 async def update_my_info(
         updated_info: UserUpdate,
         current_user: UserModel = Depends(get_current_user)
 ):
-    """
-    현재 로그인한 사용자의 정보를 수정합니다.
-    """
     # 받은 데이터로 유저 모델 업데이트
     if updated_info.user:
         current_user.user = updated_info.user

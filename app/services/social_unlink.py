@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 import httpx  # 비동기 HTTP 요청을 위한 라이브러리
 from app.models.user import UserModel
-from app.dependencies import get_authenticated_user
 
 router = APIRouter()
 

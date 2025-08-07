@@ -1,22 +1,16 @@
 import os
-from datetime import datetime, timedelta
 from typing import Any, Dict, cast
 
 import requests
 from fastapi import HTTPException, status
 from jose import jwt
 
-from app.models.refresh_token import RefreshTokenModel
 from app.models.user import Social, UserModel
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI")
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 
 def request_google_token(code: str) -> Dict[str, Any]:
@@ -65,25 +59,3 @@ async def get_or_create_google_user(email: str) -> UserModel:
             likes=0,
         )
     return user
-
-
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-
-async def create_refresh_token(user: UserModel):
-    refresh_token_expires = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    refresh_token_payload = {
-        "sub": str(user.id),
-        "exp": datetime.utcnow() + refresh_token_expires,
-    }
-    refresh_token = jwt.encode(refresh_token_payload, SECRET_KEY, algorithm=ALGORITHM)
-    await RefreshTokenModel.create(user=user, token=refresh_token)
-    return refresh_token

@@ -1,5 +1,4 @@
 from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from tortoise import Tortoise
 
@@ -14,9 +13,7 @@ from app.config.tortoise_config import initialize_tortoise
 async def lifespan(app: FastAPI):
     print("Application startup...")
     # 🚨 DB 연결 초기화 및 스키마 생성
-    await Tortoise.generate_schemas()  # 🚨 스키마 생성만 호출
-
-    print("Database schemas generated!")
+    initialize_tortoise(app)
 
     yield
 
@@ -32,4 +29,3 @@ app.include_router(kakao_auth_router)
 app.include_router(google_auth_router)
 app.include_router(user_router)
 
-initialize_tortoise(app)
