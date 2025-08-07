@@ -1,6 +1,6 @@
 from uuid import UUID, uuid4
 from pydantic import BaseModel
-from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi import FastAPI, Depends, HTTPException, Request,Response
 from fastapi_sessions.backends.implementations import InMemoryBackend
 from fastapi_sessions.frontends.implementations import SessionCookie, CookieParameters
 
@@ -22,25 +22,22 @@ cookie = SessionCookie(
     secret_key="your-super-secret-key",  # 반드시 안전한 비밀 키 사용
     cookie_params=cookie_params,
 )
-
-async def get_email_from_cookie(request: Request) -> SessionData:
-    """클라이언트 쿠키에서 세션 ID를 읽어 세션 데이터를 반환합니다."""
-    session_id = cookie.get_session_id(request)
-    if not session_id:
-        raise HTTPException(status_code=401, detail="세션 쿠키가 존재하지 않습니다.")
-
-    data = await backend.read(session_id)
-    if data is None:
-        raise HTTPException(status_code=401, detail="유효하지 않은 세션입니다.")
-    return data
-
-
-async def set_cookie_by_email(email:str):
+async def set_cookie_by_email(email:str, google_or_kakao:str, response: Response) -> SessionData:
     social_email = email
     session_id = uuid4()
-    session_data = SessionData(email=social_email)
+    session_data = SessionData(email=social_email, google_or_kakao=google_or_kakao)
     await backend.create(session_id, session_data)
+    print("backend added")
+    cookie.attach_to_response(response, session_id)
+    return response
 
-    return cookie.set_session(session_id)
+async def get_data_from_cookie(session_id: UUID = Depends(cookie)) -> SessionData:
+    session_data = await backend.read(session_id)
+    if session_data is None:
+        raise HTTPException(status_code=401, detail="유효하지 않은 세션입니다.")
+
+    return session_data
+
+
 
 

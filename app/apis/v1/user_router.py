@@ -1,16 +1,16 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Response
 from tortoise.exceptions import IntegrityError
 from app.dtos.user_dto import UserDTO, UserUpdate
 from app.models.user import UserModel  # 🚨 UserModel 모델을 import
 from app.services.social_unlink import unlink_social_account
 from app.services.token_service import get_current_user
-from app.services.social_auth_session import get_email_from_cookie, cookie, SessionData
+from app.services.social_auth_session import get_data_from_cookie, cookie, SessionData
 router = APIRouter(prefix="/user", tags=["user"])
 
 @router.post("/register", description="register")
 async def register_user(
         user_data: UserDTO,
-        session_data: SessionData = Depends(get_email_from_cookie)
+        session_data: SessionData = Depends(get_data_from_cookie)
 ):
     try:
         email = session_data.email
@@ -25,11 +25,12 @@ async def register_user(
             birthday=user_data.birthday,
             likes=0,
         )
-        return cookie.delete_session()
+        response = Response(status_code=status.HTTP_201_CREATED)
+        return cookie.delete_from_response(response)
 
     except IntegrityError:
         raise HTTPException(
-            status_code=400, detail="User with this email or username already exists."
+            status_code=400, detail="Wrong Request"
         )
 
 @router.get("/me")
