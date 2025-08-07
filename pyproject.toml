@@ -27,6 +27,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "python-jose>=3.5.0",
     "itsdangerous>=2.2.0",
+    "fastapi-sessions>=0.3.2",
 ]
 
 [tool.setuptools]
