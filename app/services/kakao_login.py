@@ -1,5 +1,4 @@
 import os
-
 import dotenv
 import requests
 from fastapi import HTTPException
@@ -13,14 +12,12 @@ KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
 
 # 2. 토큰 요청 함수 (인가 코드를 인자로 받음)
 def request_kakao_token(code: str):
-
     data = {
         "grant_type": "authorization_code",
         "client_id": KAKAO_REST_API_KEY,
         "redirect_uri": REDIRECT_URI,
         "code": code,
     }
-
     try:
         response = requests.post(KAKAO_TOKEN_URL, data=data)
         response.raise_for_status()  # HTTP 오류 발생 시 예외 발생

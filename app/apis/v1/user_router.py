@@ -3,7 +3,7 @@ from tortoise.exceptions import IntegrityError
 from app.dtos.user_dto import UserDTO, UserUpdate
 from app.models.user import UserModel  # 🚨 UserModel 모델을 import
 from app.services.social_unlink import unlink_social_account
-from app.services.token_service import get_current_user
+from app.services.token_service import get_current_user, create_access_token, create_refresh_token
 from app.services.social_auth_session import get_data_from_cookie, cookie, SessionData
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -26,7 +26,12 @@ async def register_user(
             likes=0,
         )
         response = Response(status_code=status.HTTP_201_CREATED)
-        return cookie.delete_from_response(response)
+        access_token = create_access_token(data={"sub": new_user.email})
+        refresh_token = await create_refresh_token(new_user)
+        response.set_cookie(key="access_token", value=access_token, httponly=False)
+        response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+        cookie.delete_from_response(response)
+        return response
 
     except IntegrityError:
         raise HTTPException(
@@ -35,9 +40,6 @@ async def register_user(
 
 @router.get("/me")
 async def get_my_info(current_user: UserModel = Depends(get_current_user)):
-    """
-    현재 로그인한 사용자의 정보를 반환합니다.
-    """
     return {
         "id": current_user.id,
         "email": current_user.email,
