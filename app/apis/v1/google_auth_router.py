@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Response, status
 from fastapi.responses import RedirectResponse
-from app.models.user import UserModel
+
 from app.models.refresh_token import RefreshTokenModel
+from app.models.user import UserModel
 from app.services.google_login import (
     get_google_profile,
     request_google_token,
 )
-from app.services.token_service import(create_access_token, create_refresh_token)
 from app.services.social_auth_session import set_cookie_by_email
+from app.services.token_service import create_access_token, create_refresh_token
 
 router = APIRouter(prefix="", tags=["google-login"])
 BASE_URL = "http://localhost:8000"
@@ -34,4 +35,6 @@ async def google_auth(code: str, response: Response):
         response_with_session = await set_cookie_by_email(email, "google", redirect_response)
         return response_with_session
 
-# https://accounts.google.com/o/oauth2/v2/auth?281980891262-7nagpvldql6sg5ejlvsecps9gvlsdcqj.apps.googleusercontent.com&http://localhost:8000/google-login&https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile&response_type=code
+# https://accounts.google.com/o/oauth2/v2/auth?281980891262-7nagpvldql6sg5ejlvsecps9gvlsdcqj.
+# apps.googleusercontent.com&http://localhost:8000/google-login&https://www.googleapis.com/auth/userinfo.email
+# https://www.googleapis.com/auth/userinfo.profile&response_type=code

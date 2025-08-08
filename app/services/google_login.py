@@ -1,8 +1,8 @@
 import os
 from typing import Any, Dict, cast
+
 import requests
 from fastapi import HTTPException, status
-from app.models.user import Social, UserModel
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")

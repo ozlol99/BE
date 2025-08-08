@@ -1,9 +1,11 @@
 import os
+
 import httpx
 from dotenv import load_dotenv
-from fastapi import APIRouter, HTTPException, status, Query
-from app.models.rtSearch import RtSearchModel
+from fastapi import APIRouter, HTTPException, Query, status
+
 from app.dtos.riot_user_dto import RiotUser_Pydantic
+from app.models.rtSearch import RtSearchModel
 
 load_dotenv()
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")

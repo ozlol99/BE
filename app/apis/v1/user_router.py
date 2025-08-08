@@ -1,15 +1,18 @@
-from fastapi import APIRouter, HTTPException, status, Depends, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from tortoise.exceptions import IntegrityError
+
 from app.dtos.user_dto import UserDTO, UserUpdate
-from app.models.user import UserModel  # 🚨 UserModel 모델을 import
 from app.models.refresh_token import RefreshTokenModel
-from app.services.social_unlink import unlink_social_account
-from app.services.kakao_login import request_kakao_token
+from app.models.user import UserModel  # 🚨 UserModel 모델을 import
 from app.services.google_login import request_google_token
+from app.services.kakao_login import request_kakao_token
+from app.services.social_auth_session import SessionData, cookie, get_data_from_cookie
+from app.services.social_unlink import unlink_social_account
 from app.services.token_service import (
-    get_current_user, create_access_token, create_refresh_token
+    create_access_token,
+    create_refresh_token,
+    get_current_user,
 )
-from app.services.social_auth_session import get_data_from_cookie, cookie, SessionData
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -64,7 +67,7 @@ async def update_my_info(
     return {"message": "사용자 정보가 성공적으로 업데이트되었습니다."}
 
 @router.delete("/logout")
-async def delete_my_account(
+async def logout_my_account(
         current_user: UserModel = Depends(get_current_user)
 ):
     await RefreshTokenModel.filter(user=current_user).delete()
@@ -80,13 +83,14 @@ async def delete_my_account(
     # https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a04159cc219d093bdcde9d55ea4b88fc&redirect_uri=http://127.0.0.1:8000/user/delete
     if current_user.google_or_kakao == "kakao":
         token_info = request_kakao_token(code, "/user/delete")
-        await unlink_social_account(token_info["access_token"], current_user)  # 🚨 계정 삭제 전에 소셜 계정 연동 해제 함수를 호출
+        await unlink_social_account(token_info["access_token"], current_user)
         await RefreshTokenModel.filter(user=current_user).delete()
         await current_user.delete() # 🚨 DB에서 사용자 데이터 삭제
         return {"message": "사용자 계정이 성공적으로 삭제되었습니다."}
     else:
         token_info = request_google_token(code, "/user/delete")
-        await unlink_social_account(token_info["access_token"], current_user)  # 🚨 계정 삭제 전에 소셜 계정 연동 해제 함수를 호출
+        # 🚨 계정 삭제 전에 소셜 계정 연동 해제 함수를 호출
+        await unlink_social_account(token_info["access_token"], current_user)
         await RefreshTokenModel.filter(user=current_user).delete()
         await current_user.delete() # 🚨 DB에서 사용자 데이터 삭제
         return {"message": "사용자 계정이 성공적으로 삭제되었습니다."}

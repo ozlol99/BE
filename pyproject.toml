@@ -39,7 +39,7 @@ src_folder = "./."
 
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 fix = true
 exclude = [
     "migrations/",
