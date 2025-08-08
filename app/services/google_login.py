@@ -1,10 +1,7 @@
 import os
 from typing import Any, Dict, cast
-
 import requests
 from fastapi import HTTPException, status
-from jose import jwt
-
 from app.models.user import Social, UserModel
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
@@ -13,13 +10,13 @@ GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI")
 
 
 
-def request_google_token(code: str) -> Dict[str, Any]:
+def request_google_token(code: str, detail_url) -> Dict[str, Any]:
     token_url = "https://oauth2.googleapis.com/token"
     data = {
         "code": code,
         "client_id": GOOGLE_CLIENT_ID,
         "client_secret": GOOGLE_CLIENT_SECRET,
-        "redirect_uri": GOOGLE_REDIRECT_URI,
+        "redirect_uri": f"{GOOGLE_REDIRECT_URI}{detail_url}",
         "grant_type": "authorization_code",
     }
     response = requests.post(token_url, data=data)

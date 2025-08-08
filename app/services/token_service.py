@@ -1,4 +1,4 @@
-import requests, os
+import requests, os, dotenv
 from fastapi import HTTPException, status, Depends, Response, Request
 from jose import jwt
 from datetime import datetime, timedelta
@@ -7,10 +7,12 @@ from app.models.user import UserModel
 from typing import Optional
 from fastapi.security import OAuth2PasswordBearer
 
+dotenv.load_dotenv()
 SECRET_KEY = os.environ.get("SECRET_KEY")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-REFRESH_TOKEN_EXPIRE_DAYS = 7
+ALGORITHM = os.environ.get("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES"))
+REFRESH_TOKEN_EXPIRE_DAYS = int(os.environ.get("REFRESH_TOKEN_EXPIRE_DAYS"))
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
@@ -22,7 +24,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-
 async def create_refresh_token(user: UserModel):
     refresh_token_expires = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     refresh_token_payload = {
@@ -32,11 +33,6 @@ async def create_refresh_token(user: UserModel):
     refresh_token = jwt.encode(refresh_token_payload, SECRET_KEY, algorithm=ALGORITHM)
     await RefreshTokenModel.create(user=user, token=refresh_token)
     return refresh_token
-
-
-# 토큰을 가져올 URL 지정. 이 URL은 실제 토큰을 발급하는 엔드포인트는 아닙니다.
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
-
 
 async def get_current_user(
         request: Request,
@@ -90,34 +86,4 @@ def verify_access_token(token: str) -> Optional[dict]:
         return None
     except jwt.InvalidTokenError:
         return None
-
-async def verify_refresh_token(token: str) -> Optional[UserModel]:
-    user = await UserModel.get_or_none(refresh_token=token)
-    return user
-
-async def refresh_access_token_and_get_user(
-        refresh_token: str
-):
-    try:
-        db_refresh_token = await RefreshTokenModel.get_or_none(token=refresh_token)
-        if not db_refresh_token:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="유효하지 않은 Refresh Token입니다."
-            )
-
-        user = await db_refresh_token.user
-
-        new_access_token = create_access_token(data={"sub": user.email})
-        response.set_cookie(key="access_token", value=new_access_token, httponly=False)
-
-        return {"access_token": new_access_token, "user_email": user.email}
-
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Refresh Token 처리 중 오류가 발생했습니다."
-        )
-
-
 

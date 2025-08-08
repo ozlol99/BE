@@ -1,14 +1,13 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Response
 from tortoise.exceptions import IntegrityError
 from app.dtos.user_dto import UserDTO, UserUpdate
-from app.models import refresh_token
 from app.models.user import UserModel  # 🚨 UserModel 모델을 import
 from app.models.refresh_token import RefreshTokenModel
 from app.services.social_unlink import unlink_social_account
 from app.services.kakao_login import request_kakao_token
 from app.services.token_service import (
-    get_current_user, create_access_token, create_refresh_token,
-    verify_refresh_token, verify_access_token)
+    get_current_user, create_access_token, create_refresh_token
+)
 from app.services.social_auth_session import get_data_from_cookie, cookie, SessionData
 
 router = APIRouter(prefix="/user", tags=["user"])
