@@ -5,6 +5,7 @@ from app.models.user import UserModel  # 🚨 UserModel 모델을 import
 from app.models.refresh_token import RefreshTokenModel
 from app.services.social_unlink import unlink_social_account
 from app.services.kakao_login import request_kakao_token
+from app.services.google_login import request_google_token
 from app.services.token_service import (
     get_current_user, create_access_token, create_refresh_token
 )
@@ -74,7 +75,8 @@ async def delete_my_account(
         code: str,
         current_user: UserModel = Depends(get_current_user)
 ):
-    # User가 주소 클릭
+    # User가 주소 클릭 (카카오로 연동했는지 구글로 연동했는지 확인해야함)
+    # 구글 auth-code 얻는 주소
     # https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a04159cc219d093bdcde9d55ea4b88fc&redirect_uri=http://127.0.0.1:8000/user/delete
     if current_user.google_or_kakao == "kakao":
         token_info = request_kakao_token(code, "/user/delete")
@@ -83,4 +85,8 @@ async def delete_my_account(
         await current_user.delete() # 🚨 DB에서 사용자 데이터 삭제
         return {"message": "사용자 계정이 성공적으로 삭제되었습니다."}
     else:
-        return {"Hi"}
+        token_info = request_google_token(code, "/user/delete")
+        await unlink_social_account(token_info["access_token"], current_user)  # 🚨 계정 삭제 전에 소셜 계정 연동 해제 함수를 호출
+        await RefreshTokenModel.filter(user=current_user).delete()
+        await current_user.delete() # 🚨 DB에서 사용자 데이터 삭제
+        return {"message": "사용자 계정이 성공적으로 삭제되었습니다."}
