@@ -5,6 +5,7 @@ from tortoise import Tortoise
 from app.apis.v1.google_auth_router import router as google_auth_router
 from app.apis.v1.kakao_auth_router import router as kakao_auth_router
 from app.apis.v1.user_router import router as user_router
+from app.apis.v1.riot_routes import router as riot_router
 from app.config.tortoise_config import TORTOISE_ORM
 
 
@@ -33,4 +34,6 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(kakao_auth_router)
 app.include_router(google_auth_router)
 app.include_router(user_router)
+app.include_router(riot_router)
+
 

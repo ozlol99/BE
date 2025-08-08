@@ -1,0 +1,15 @@
+from tortoise import fields, models
+
+class rtSearchModel(models.Model):
+    summoner_name = fields.CharField(
+        max_length=50, description="소환사 이름"
+    )
+    tag_line = fields.CharField(
+        max_length=50, description="태그"
+    )
+    class Meta:
+        table = "search_history"
+
+    def __str__(self):
+        return self.token
+
