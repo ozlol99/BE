@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Response, status
 from fastapi.responses import RedirectResponse
+from app.models.user import UserModel
 from app.models.refresh_token import RefreshTokenModel
 from app.services.google_login import (
     get_google_profile,
-    get_or_create_google_user,
     request_google_token,
 )
 from app.services.token_service import(create_access_token, create_refresh_token)
@@ -16,7 +16,7 @@ BASE_URL = "http://localhost:8000"
 async def google_auth(code: str, response: Response):
     token_info = request_google_token(code,detail_url="/google-login")
     email = get_google_profile(token_info["access_token"])
-    user = await get_or_create_google_user(email)
+    user = await UserModel.get_or_none(email=email)
 
     if user:
         await RefreshTokenModel.filter(user=user).delete()

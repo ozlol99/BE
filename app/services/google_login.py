@@ -40,19 +40,3 @@ def get_google_profile(access_token: str) -> str:
     user_info = response.json()
     return cast(str, user_info["email"])
 
-
-async def get_or_create_google_user(email: str) -> UserModel:
-    user = await UserModel.get_or_none(email=email)
-    if user:
-        if user.google_or_kakao != Social.google:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"This email is already registered with {user.google_or_kakao}",
-            )
-    else:
-        user = await UserModel.create(
-            email=email,
-            google_or_kakao=Social.google,
-            likes=0,
-        )
-    return user
