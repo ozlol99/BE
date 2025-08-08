@@ -1,4 +1,6 @@
 from tortoise.contrib.pydantic import pydantic_model_creator
-from app.models.rtSearch import rtSearchModel
+from typing import List
+from app.models.rtSearch import RtSearchModel
 
-rtSearch_Summoner_List = pydantic_model_creator(rtSearchModel, many=True)
+RiotUser_Pydantic = pydantic_model_creator(RtSearchModel)
+
