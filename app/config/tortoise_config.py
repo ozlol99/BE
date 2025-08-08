@@ -10,6 +10,8 @@ TORTOISE_APP_MODELS: list[str] = [
     "app.models.token_blacklist",
     "app.models.RSO_user",
     "app.models.refresh_token",
+    "app.models.rtSearch",
+
 ]
 
 TORTOISE_ORM = {

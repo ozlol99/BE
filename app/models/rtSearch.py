@@ -1,6 +1,6 @@
 from tortoise import fields, models
 
-class rtSearchModel(models.Model):
+class RtSearchModel(models.Model):
     summoner_name = fields.CharField(
         max_length=50, description="소환사 이름"
     )
@@ -8,7 +8,7 @@ class rtSearchModel(models.Model):
         max_length=50, description="태그"
     )
     class Meta:
-        table = "search_history"
+        table = "rt_search"
 
     def __str__(self):
         return self.token
