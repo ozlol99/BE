@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
 import httpx  # 비동기 HTTP 요청을 위한 라이브러리
+from fastapi import APIRouter
+
 from app.models.user import UserModel
 
 router = APIRouter()
@@ -10,9 +11,10 @@ async def unlink_social_account(token_info, user: UserModel):
     # httpx 클라이언트를 사용해 비동기로 API 호출
     async with httpx.AsyncClient() as client:
         if user.google_or_kakao == "kakao":
-            kakao_access_token = token_info  # DB에서 토큰을 가져오거나, 다른 방법으로 획득
+            kakao_access_token = token_info
             headers = {"Authorization": f"Bearer {kakao_access_token}"}
-            response = await client.post("https://kapi.kakao.com/v1/user/unlink", headers=headers)
+            response = await client.post(
+                "https://kapi.kakao.com/v1/user/unlink", headers=headers)
             if response.status_code != 200:
                 print(f"카카오 계정 연동 해제 실패: {response.text}")
                 # 실패하더라도 서비스 내부 계정은 삭제할지, 롤백할지 결정해야 함

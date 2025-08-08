@@ -1,8 +1,9 @@
 from uuid import UUID, uuid4
-from pydantic import BaseModel
-from fastapi import FastAPI, Depends, HTTPException, Request,Response
+
+from fastapi import Depends, HTTPException, Response
 from fastapi_sessions.backends.implementations import InMemoryBackend
-from fastapi_sessions.frontends.implementations import SessionCookie, CookieParameters
+from fastapi_sessions.frontends.implementations import CookieParameters, SessionCookie
+from pydantic import BaseModel
 
 
 # 1. 세션에 저장할 데이터 모델 정의
@@ -23,7 +24,8 @@ cookie = SessionCookie(
     cookie_params=cookie_params,
 )
 
-async def set_cookie_by_email(email:str, google_or_kakao:str, response: Response) -> SessionData:
+async def set_cookie_by_email(
+        email:str, google_or_kakao:str, response: Response) -> SessionData:
     social_email = email
     session_id = uuid4()
     session_data = SessionData(email=social_email, google_or_kakao=google_or_kakao)

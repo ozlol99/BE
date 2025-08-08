@@ -1,11 +1,14 @@
-import requests, os, dotenv
-from fastapi import HTTPException, status, Depends, Response, Request
-from jose import jwt
+import os
 from datetime import datetime, timedelta
+from typing import Optional
+
+import dotenv
+from fastapi import Depends, HTTPException, Request, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt
+
 from app.models.refresh_token import RefreshTokenModel
 from app.models.user import UserModel
-from typing import Optional
-from fastapi.security import OAuth2PasswordBearer
 
 dotenv.load_dotenv()
 SECRET_KEY = os.environ.get("SECRET_KEY")

@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Response, status
 from fastapi.responses import RedirectResponse
-from app.models.user import UserModel
+
 from app.models.refresh_token import RefreshTokenModel
-from app.services.kakao_login import (get_kakao_profile, request_kakao_token)
-from app.services.token_service import(create_access_token, create_refresh_token)
+from app.models.user import UserModel
+from app.services.kakao_login import get_kakao_profile, request_kakao_token
 from app.services.social_auth_session import set_cookie_by_email
+from app.services.token_service import create_access_token, create_refresh_token
 
 router = APIRouter(prefix="", tags=["kakao-user"])
 BASE_URL = "http://localhost:8000"
