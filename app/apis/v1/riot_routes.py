@@ -2,8 +2,8 @@ import os
 import httpx
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, status, Query
-from app.models.rtSearch import rtSearchModel
-from app.dtos.riot_user_dto import rtSearch_Summoner_List
+from app.models.rtSearch import RtSearchModel
+from app.dtos.riot_user_dto import RiotUser_Pydantic
 
 load_dotenv()
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")
@@ -13,9 +13,10 @@ ASIA_BASE_URL = "https://asia.api.riotgames.com"
 KR_BASE_URL = "https://kr.api.riotgames.com"
 
 @router.get("/rtSearch")
-async def rtSearch(game_name: str = Query(..., description="검색할 소환사명 일부")):
-    users = await rtSearchModel.filter(game_name__icontains=game_name)
-    return await rtSearch_Summoner_List.from_queryset(users)
+async def rtSearch(summoner_name: str = Query(..., description="검색할 소환사명 일부")):
+    users = await RtSearchModel.filter(summoner_name__icontains=summoner_name)
+    pydantic_users = [RiotUser_Pydantic.from_orm(user) for user in users]
+    return pydantic_users
 
 @router.get("/summoner-info/{game_name}/{tag_line}")
 async def search_summoner(game_name: str, tag_line: str):
@@ -42,6 +43,14 @@ async def search_summoner(game_name: str, tag_line: str):
             )
             res2.raise_for_status()
             summoner_data = res2.json()
+        await RtSearchModel.get_or_create(
+            puuid=puuid,
+            defaults={
+                "summoner_name": game_name,
+                "tag_line": tag_line,
+            }
+        )
+
         return {
             "summonerId": summoner_data.get('id'),
             "accountId": summoner_data.get('accountId'),
