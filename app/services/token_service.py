@@ -96,7 +96,6 @@ async def verify_refresh_token(token: str) -> Optional[UserModel]:
     return user
 
 async def refresh_access_token_and_get_user(
-        response: Response,
         refresh_token: str
 ):
     try:

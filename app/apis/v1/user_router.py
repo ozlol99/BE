@@ -1,10 +1,16 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Response
 from tortoise.exceptions import IntegrityError
 from app.dtos.user_dto import UserDTO, UserUpdate
+from app.models import refresh_token
 from app.models.user import UserModel  # 🚨 UserModel 모델을 import
+from app.models.refresh_token import RefreshTokenModel
 from app.services.social_unlink import unlink_social_account
-from app.services.token_service import get_current_user, create_access_token, create_refresh_token
+from app.services.kakao_login import request_kakao_token
+from app.services.token_service import (
+    get_current_user, create_access_token, create_refresh_token,
+    verify_refresh_token, verify_access_token)
 from app.services.social_auth_session import get_data_from_cookie, cookie, SessionData
+
 router = APIRouter(prefix="/user", tags=["user"])
 
 @router.post("/register", description="register")
@@ -15,7 +21,6 @@ async def register_user(
     try:
         email = session_data.email
         google_or_kakao = session_data.google_or_kakao
-
         new_user = await UserModel.create(
             email=email,
             user=user_data.user,  # 닉네임
@@ -53,23 +58,30 @@ async def update_my_info(
         updated_info: UserUpdate,
         current_user: UserModel = Depends(get_current_user)
 ):
-    # 받은 데이터로 유저 모델 업데이트
     if updated_info.user:
         current_user.user = updated_info.user
-    if updated_info.email:
-        # 이메일 중복 체크 등 필요한 유효성 검사 추가
-        current_user.email = updated_info.email
-
     await current_user.save()
-
     return {"message": "사용자 정보가 성공적으로 업데이트되었습니다."}
 
-
-@router.delete("/me")
+@router.delete("/logout")
 async def delete_my_account(
         current_user: UserModel = Depends(get_current_user)
 ):
-    await unlink_social_account(current_user)  # 🚨 계정 삭제 전에 소셜 계정 연동 해제 함수를 호출
-    await current_user.delete() # 🚨 DB에서 사용자 데이터 삭제
+    await RefreshTokenModel.filter(user=current_user).delete()
+    return  {"message": "모든 세션이 종료되었습니다. 로그아웃되었습니다."}
 
-    return {"message": "사용자 계정이 성공적으로 삭제되었습니다."}
+@router.get("/delete")
+async def delete_my_account(
+        code: str,
+        current_user: UserModel = Depends(get_current_user)
+):
+    # User가 주소 클릭
+    # https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a04159cc219d093bdcde9d55ea4b88fc&redirect_uri=http://127.0.0.1:8000/user/delete
+    if current_user.google_or_kakao == "kakao":
+        token_info = request_kakao_token(code, "/user/delete")
+        await unlink_social_account(token_info["access_token"], current_user)  # 🚨 계정 삭제 전에 소셜 계정 연동 해제 함수를 호출
+        await RefreshTokenModel.filter(user=current_user).delete()
+        await current_user.delete() # 🚨 DB에서 사용자 데이터 삭제
+        return {"message": "사용자 계정이 성공적으로 삭제되었습니다."}
+    else:
+        return {"Hi"}
