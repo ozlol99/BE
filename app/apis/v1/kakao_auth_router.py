@@ -15,7 +15,7 @@ async def kakao_auth(code: str, response: Response):
     email = get_kakao_profile(token_info["access_token"])
     user = await UserModel.get_or_none(email=email)
 
-    if user: # 아이디가 있으면 바로 메인페이지
+    if user:
         await RefreshTokenModel.filter(user=user).delete()
         access_token = create_access_token(data={"sub": user.email})
         refresh_token = await create_refresh_token(user)
@@ -25,8 +25,9 @@ async def kakao_auth(code: str, response: Response):
         redirect_response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
         return redirect_response
 
-    else:  # 첫 로그인이라면 회원가입
-        redirect_response = RedirectResponse(url=f"{BASE_URL}/user/register", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    else:
+        redirect_response = RedirectResponse(
+            url=f"{BASE_URL}/user/register", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
         response_with_session = await set_cookie_by_email(email, "kakao", redirect_response)
         return response_with_session
 
