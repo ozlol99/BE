@@ -26,6 +26,8 @@ dependencies = [
     "python-jose>=3.3.0",
     "python-dotenv>=1.0.0",
     "python-jose>=3.5.0",
+    "itsdangerous>=2.2.0",
+    "fastapi-sessions>=0.3.2",
 ]
 
 [tool.setuptools]
@@ -37,7 +39,7 @@ src_folder = "./."
 
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 fix = true
 exclude = [
     "migrations/",
