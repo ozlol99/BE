@@ -7,6 +7,7 @@ from tortoise import fields, models
 if TYPE_CHECKING:
     from app.models.user import UserModel
 
+
 class RefreshTokenModel(models.Model):
     id = fields.IntField(pk=True)
     user: fields.ForeignKeyRelation[UserModel] = fields.ForeignKeyField(

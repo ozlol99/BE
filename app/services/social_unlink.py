@@ -14,7 +14,8 @@ async def unlink_social_account(token_info, user: UserModel):
             kakao_access_token = token_info
             headers = {"Authorization": f"Bearer {kakao_access_token}"}
             response = await client.post(
-                "https://kapi.kakao.com/v1/user/unlink", headers=headers)
+                "https://kapi.kakao.com/v1/user/unlink", headers=headers
+            )
             if response.status_code != 200:
                 print(f"카카오 계정 연동 해제 실패: {response.text}")
                 # 실패하더라도 서비스 내부 계정은 삭제할지, 롤백할지 결정해야 함

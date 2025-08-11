@@ -9,7 +9,6 @@ GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI")
 
 
-
 def request_google_token(code: str, detail_url) -> Dict[str, Any]:
     token_url = "https://oauth2.googleapis.com/token"
     data = {
@@ -39,4 +38,3 @@ def get_google_profile(access_token: str) -> str:
         )
     user_info = response.json()
     return cast(str, user_info["email"])
-

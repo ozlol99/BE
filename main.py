@@ -36,5 +36,3 @@ app.include_router(kakao_auth_router)
 app.include_router(google_auth_router)
 app.include_router(user_router)
 app.include_router(riot_router)
-
-
