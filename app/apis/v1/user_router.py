@@ -27,7 +27,7 @@ async def register_user(
         new_user = await UserModel.create(
             email=email,
             user=user_data.user,  # 닉네임
-            riot_user="Cannot Insert Now",
+            riot_user="user_data.riot_user",
             google_or_kakao=google_or_kakao,
             gender=user_data.gender,  # 1 남자 0 여자
             birthday=user_data.birthday,
@@ -68,9 +68,10 @@ async def update_my_info(
 
 @router.delete("/logout")
 async def logout_my_account(
+        response: Response = Response(),
         current_user: UserModel = Depends(get_current_user)
 ):
-    await RefreshTokenModel.filter(user=current_user).delete()
+    response.delete_cookie(key="access_token")
     return  {"message": "모든 세션이 종료되었습니다. 로그아웃되었습니다."}
 
 @router.get("/delete")
@@ -88,6 +89,7 @@ async def delete_my_account(
         await current_user.delete() # 🚨 DB에서 사용자 데이터 삭제
         return {"message": "사용자 계정이 성공적으로 삭제되었습니다."}
     else:
+        # https://accounts.google.com/o/oauth2/v2/auth?response_type=code&scope=openid%20email&client_id=281980891262-7nagpvldql6sg5ejlvsecps9gvlsdcqj.apps.googleusercontent.com&redirect_uri=http://localhost:8000/user/delete
         token_info = request_google_token(code, "/user/delete")
         # 🚨 계정 삭제 전에 소셜 계정 연동 해제 함수를 호출
         await unlink_social_account(token_info["access_token"], current_user)

@@ -35,6 +35,5 @@ async def google_auth(code: str, response: Response):
         response_with_session = await set_cookie_by_email(email, "google", redirect_response)
         return response_with_session
 
-# https://accounts.google.com/o/oauth2/v2/auth?281980891262-7nagpvldql6sg5ejlvsecps9gvlsdcqj.
-# apps.googleusercontent.com&http://localhost:8000/google-login&https://www.googleapis.com/auth/userinfo.email
-# https://www.googleapis.com/auth/userinfo.profile&response_type=code
+# https://accounts.google.com/o/oauth2/v2/auth?response_type=code&scope=openid%20email&client_id=281980891262-7nagpvldql6sg5ejlvsecps9gvlsdcqj.apps.googleusercontent.com&redirect_uri=http://localhost:8000/google-login
+
