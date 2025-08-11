@@ -1,10 +1,10 @@
-from fastapi import APIRouter, HTTPException, Query, status
 from typing import Optional
+
+from fastapi import APIRouter, Query
 
 from app.dtos.riot_user_dto import RiotUser_Pydantic
 from app.models.search_summoner import RtSearchModel
 from app.services.summoner_search_service import get_summoner_info
-
 
 router = APIRouter(prefix="/riot", tags=["RIOT APIs"])
 
@@ -26,3 +26,4 @@ async def search_summoner(game_name: str, tag_line: str):
   # Riot ID(닉네임 + 태그)를 사용하여 소환사 정보를 조회합니다.
     summoner_info = await get_summoner_info(game_name, tag_line)
     return summoner_info
+

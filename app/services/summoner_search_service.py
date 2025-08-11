@@ -1,7 +1,8 @@
 import os
+
 import httpx
-from dotenv import load_dotenv
 from fastapi import HTTPException, status
+
 from app.models.search_summoner import RtSearchModel
 
 ASIA_BASE_URL = "https://asia.api.riotgames.com"
