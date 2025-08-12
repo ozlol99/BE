@@ -48,6 +48,7 @@ async def get_summoner_info(summoner_name: str, tag_line: str):
             "summonerId": summoner_data.get("id"),
             "accountId": summoner_data.get("accountId"),
             "puuid": summoner_data.get("puuid"),
+            "profileIconId": summoner_data.get("profileIconId"),
             "summonerLevel": summoner_data.get("summonerLevel"),
         }
 
@@ -66,6 +67,38 @@ async def get_summoner_info(summoner_name: str, tag_line: str):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"예상치 못한 서버 오류: {str(e)}",
         )
+
+async def get_rank_info(summoner_id: str) -> Dict[str, Any]:
+    url = f"{KR_BASE_URL}/lol/league/v4/entries/by-puuid/{summoner_id}?api_key={RIOT_API_KEY}"
+    response = requests.get(url)
+    if response.status_code != 200:
+        print("Rank_data Return Error!")
+        return {}  # 랭크 정보가 없는 경우 빈 딕셔너리 반환
+
+    data = response.json()
+
+    rank_data = {}
+    for entry in data:
+        queue_type = entry.get("queueType")
+        if queue_type == "RANKED_SOLO_5x5":
+            rank_data["solo_rank"] = {
+                "tier": entry.get("tier"),
+                "rank": entry.get("rank"),
+                "league_points": entry.get("leaguePoints"),
+                "wins": entry.get("wins"),
+                "losses": entry.get("losses"),
+                "win_rate": round(entry.get("wins") / (entry.get("wins") + entry.get("losses")) * 100, 2)
+            }
+        elif queue_type == "RANKED_FLEX_SR":
+            rank_data["flex_rank"] = {
+                "tier": entry.get("tier"),
+                "rank": entry.get("rank"),
+                "league_points": entry.get("leaguePoints"),
+                "wins": entry.get("wins"),
+                "losses": entry.get("losses"),
+                "win_rate": round(entry.get("wins") / (entry.get("wins") + entry.get("losses")) * 100, 2)
+            }
+    return rank_data
 
 QUEUE_TYPE_MAP = {
     400: "일반 게임",

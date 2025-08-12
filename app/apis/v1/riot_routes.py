@@ -4,7 +4,7 @@ from fastapi import APIRouter, Query
 
 from app.dtos.riot_user_dto import RiotUser_Pydantic
 from app.models.search_summoner import RtSearchModel
-from app.services.summoner_search_service import get_summoner_info, get_recent_matches
+from app.services.summoner_search_service import get_summoner_info, get_recent_matches, get_rank_info
 
 router = APIRouter(prefix="/riot", tags=["RIOT APIs"])
 
@@ -22,10 +22,15 @@ async def rtSearch(
 
 
 @router.get("/summoner-info/{summoner_name}/{tag_line}")
-async def search_summoner(summoner_name: str, tag_line: str, queue_id: Optional[int] = None):
+async def search_summoner(
+        summoner_name: str,
+        tag_line: str,
+        queue_id: Optional[int] = None
+):
     summoner_info = await get_summoner_info(summoner_name, tag_line)
+    rank_info = await get_rank_info(summoner_info["puuid"])
     recent_matches = await get_recent_matches(
         summoner_info["puuid"],
         queue_id
     )
-    return recent_matches
+    return rank_info, summoner_info, recent_matches
