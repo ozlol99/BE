@@ -26,8 +26,8 @@ async def search_summoner(
         summoner_name: str,
         tag_line: str,
         queue_id: Optional[int] = None,
-        count_start: int = 10,  # 👈 쿼리 파라미터로 start를 받음
-        match_count: int = 5,  # 👈 쿼리 파라미터로 count를 받음
+        count_start: int = 0,  # 👈 쿼리 파라미터로 start를 받음
+        match_count: int = 20,  # 👈 쿼리 파라미터로 count를 받음
 ):
     summoner_info = await get_summoner_info(summoner_name, tag_line)
     rank_info = await get_rank_info(summoner_info["puuid"])
