@@ -7,12 +7,14 @@ from app.models.user import UserModel  # 🚨 UserModel 모델을 import
 from app.services.google_login import request_google_token
 from app.services.kakao_login import request_kakao_token
 from app.services.social_auth_session import SessionData, cookie, get_data_from_cookie
+from app.services.user_likes import add_like
 from app.services.social_unlink import unlink_social_account
 from app.services.token_service import (
     create_access_token,
     create_refresh_token,
     get_current_user,
 )
+
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -27,11 +29,10 @@ async def register_user(
         new_user = await UserModel.create(
             email=email,
             user=user_data.user,  # 닉네임
-            riot_user="user_data.riot_user",
+            riot_user="user_data.riot_user3",
             google_or_kakao=google_or_kakao,
             gender=user_data.gender,  # 1 남자 0 여자
             birthday=user_data.birthday,
-            likes=0,
         )
         response = Response(status_code=status.HTTP_201_CREATED)
         access_token = create_access_token(data={"sub": new_user.email})
@@ -52,7 +53,6 @@ async def get_my_info(current_user: UserModel = Depends(get_current_user)):
         "email": current_user.email,
         "user": current_user.user,
         "google_or_kakao": current_user.google_or_kakao,
-        "likes": current_user.likes,
     }
 
 
@@ -95,3 +95,7 @@ async def delete_my_account(
         await RefreshTokenModel.filter(user=current_user).delete()
         await current_user.delete()  # 🚨 DB에서 사용자 데이터 삭제
         return {"message": "사용자 계정이 성공적으로 삭제되었습니다."}
+
+@router.post("/like/{from_user_id}/{to_user_id}", status_code=status.HTTP_201_CREATED)
+async def handle_like(from_user_id: int, to_user_id: int):
+    return await add_like(from_user_id, to_user_id)
