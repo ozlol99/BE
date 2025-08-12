@@ -25,12 +25,21 @@ async def rtSearch(
 async def search_summoner(
         summoner_name: str,
         tag_line: str,
-        queue_id: Optional[int] = None
+        queue_id: Optional[int] = None,
+        count_start: int = 10,  # 👈 쿼리 파라미터로 start를 받음
+        match_count: int = 5,  # 👈 쿼리 파라미터로 count를 받음
 ):
     summoner_info = await get_summoner_info(summoner_name, tag_line)
     rank_info = await get_rank_info(summoner_info["puuid"])
     recent_matches = await get_recent_matches(
         summoner_info["puuid"],
-        queue_id
+        queue_id,
+        count_start,
+        match_count,
     )
-    return rank_info, summoner_info, recent_matches
+    return {
+        "summoner_info": summoner_info,
+        "rank_info": rank_info,
+        "match_summary": "recent_matches_summary",
+        "recent_matches": recent_matches,
+    }

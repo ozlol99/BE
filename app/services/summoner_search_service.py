@@ -166,12 +166,18 @@ def get_match_info(match_id: str, puuid: str) -> Dict[str, Any]:
         processed_data["position"] = participant.get("role")
     return processed_data
 
-async def get_recent_matches(puuid: str, queue_id) -> List[Dict[str, Any]]:
-    match_count: int = 20
+
+async def get_recent_matches(
+        puuid: str,
+        queue_id,
+        count_start,
+        match_count,
+) -> tuple[Dict[str, Any], List[Dict[str, Any]]]:
+
     if queue_id:
-        matchlist_url = f"{ASIA_BASE_URL}/lol/match/v5/matches/by-puuid/{puuid}/ids?count={match_count}&queue={queue_id}&api_key={RIOT_API_KEY}"
+        matchlist_url = f"{ASIA_BASE_URL}/lol/match/v5/matches/by-puuid/{puuid}/ids?start={count_start}&count={match_count}&queue={queue_id}&api_key={RIOT_API_KEY}"
     else:
-        matchlist_url = f"{ASIA_BASE_URL}/lol/match/v5/matches/by-puuid/{puuid}/ids?count={match_count}&api_key={RIOT_API_KEY}"
+        matchlist_url = f"{ASIA_BASE_URL}/lol/match/v5/matches/by-puuid/{puuid}/ids?start={count_start}&count={match_count}&api_key={RIOT_API_KEY}"
         print(f"매치 ID {match_count}개 가져오는 중...")
     response = requests.get(matchlist_url)
     if response.status_code != 200:
