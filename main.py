@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from tortoise import Tortoise
 
+from app.apis.v1.chat_router import router as chat_router
 from app.apis.v1.google_auth_router import router as google_auth_router
 from app.apis.v1.kakao_auth_router import router as kakao_auth_router
 from app.apis.v1.riot_routes import router as riot_router
@@ -16,7 +17,7 @@ async def lifespan(app: FastAPI):
     try:
         await Tortoise.init(config=TORTOISE_ORM)
         # 개발 환경에서만 스키마 자동 생성을 사용합니다.
-        await Tortoise.generate_schemas()
+        # await Tortoise.generate_schemas()
         print("Tortoise ORM initialized and schemas generated.")
     except Exception as e:
         print(f"Error initializing Tortoise: {e}")
@@ -31,8 +32,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-
 app.include_router(kakao_auth_router)
 app.include_router(google_auth_router)
 app.include_router(user_router)
 app.include_router(riot_router)
+app.include_router(chat_router)
