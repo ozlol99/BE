@@ -4,9 +4,14 @@ from fastapi import APIRouter, Query
 
 from app.dtos.riot_user_dto import RiotUser_Pydantic
 from app.models.search_summoner import RtSearchModel
-from app.services.summoner_search_service import get_summoner_info, get_recent_matches, get_rank_info
+from app.services.summoner_search_service import (
+    get_rank_info,
+    get_recent_matches,
+    get_summoner_info,
+)
 
 router = APIRouter(prefix="/riot", tags=["RIOT APIs"])
+
 
 @router.get("/rtSearch")
 async def rtSearch(
@@ -23,11 +28,11 @@ async def rtSearch(
 
 @router.get("/summoner-info/{summoner_name}/{tag_line}")
 async def search_summoner(
-        summoner_name: str,
-        tag_line: str,
-        queue_id: Optional[int] = None,
-        count_start: int = 0,  # 👈 쿼리 파라미터로 start를 받음
-        match_count: int = 20,  # 👈 쿼리 파라미터로 count를 받음
+    summoner_name: str,
+    tag_line: str,
+    queue_id: Optional[int] = None,
+    count_start: int = 0,  # 👈 쿼리 파라미터로 start를 받음
+    match_count: int = 20,  # 👈 쿼리 파라미터로 count를 받음
 ):
     summoner_info = await get_summoner_info(summoner_name, tag_line)
     rank_info = await get_rank_info(summoner_info["puuid"])

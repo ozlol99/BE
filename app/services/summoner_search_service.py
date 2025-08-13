@@ -1,11 +1,16 @@
 import os
+from typing import TYPE_CHECKING, Any, Dict, List
+
 import httpx
 import requests
-from typing import List, Dict, Any
 from fastapi import HTTPException, status
 
 from app.models.search_summoner import RtSearchModel
 from app.utils.timestamp import format_time_ago
+
+if TYPE_CHECKING:
+    pass
+
 
 ASIA_BASE_URL = "https://asia.api.riotgames.com"
 KR_BASE_URL = "https://kr.api.riotgames.com"
@@ -68,6 +73,7 @@ async def get_summoner_info(summoner_name: str, tag_line: str):
             detail=f"예상치 못한 서버 오류: {str(e)}",
         )
 
+
 async def get_rank_info(summoner_id: str) -> Dict[str, Any]:
     url = f"{KR_BASE_URL}/lol/league/v4/entries/by-puuid/{summoner_id}?api_key={RIOT_API_KEY}"
     response = requests.get(url)
@@ -87,7 +93,10 @@ async def get_rank_info(summoner_id: str) -> Dict[str, Any]:
                 "league_points": entry.get("leaguePoints"),
                 "wins": entry.get("wins"),
                 "losses": entry.get("losses"),
-                "win_rate": round(entry.get("wins") / (entry.get("wins") + entry.get("losses")) * 100, 2)
+                "win_rate": round(
+                    entry.get("wins") / (entry.get("wins") + entry.get("losses")) * 100,
+                    2,
+                ),
             }
         elif queue_type == "RANKED_FLEX_SR":
             rank_data["flex_rank"] = {
@@ -96,9 +105,13 @@ async def get_rank_info(summoner_id: str) -> Dict[str, Any]:
                 "league_points": entry.get("leaguePoints"),
                 "wins": entry.get("wins"),
                 "losses": entry.get("losses"),
-                "win_rate": round(entry.get("wins") / (entry.get("wins") + entry.get("losses")) * 100, 2)
+                "win_rate": round(
+                    entry.get("wins") / (entry.get("wins") + entry.get("losses")) * 100,
+                    2,
+                ),
             }
     return rank_data
+
 
 QUEUE_TYPE_MAP = {
     400: "일반 게임",
@@ -110,6 +123,7 @@ QUEUE_TYPE_MAP = {
     1700: "아레낭",
 }
 
+
 def get_match_info(match_id: str, puuid: str) -> Dict[str, Any]:
 
     if not RIOT_API_KEY:
@@ -117,13 +131,14 @@ def get_match_info(match_id: str, puuid: str) -> Dict[str, Any]:
     url = f"{ASIA_BASE_URL}/lol/match/v5/matches/{match_id}?api_key={RIOT_API_KEY}"
     response = requests.get(url)
     if response.status_code != 200:
-        raise ValueError(f"Riot API 호출 중 오류 발생: 상태 코드 {response.status_code}")
+        raise ValueError(
+            f"Riot API 호출 중 오류 발생: 상태 코드 {response.status_code}"
+        )
     match_data = response.json()
     info = match_data.get("info", {})
     metadata = match_data.get("metadata", {})
     participant = next(
-        (p for p in info.get("participants", []) if p.get("puuid") == puuid),
-        None
+        (p for p in info.get("participants", []) if p.get("puuid") == puuid), None
     )
 
     if not participant:
@@ -143,7 +158,7 @@ def get_match_info(match_id: str, puuid: str) -> Dict[str, Any]:
         "rank_type": QUEUE_TYPE_MAP.get(info.get("queueId"), "알 수 없는 랭크"),
         "win": participant.get("win"),  # 👈 승패 정보 추가
         "game_end_timestamp": str(format_time_ago(info.get("gameEndTimestamp"))),
-        "play_duration": str(int(info.get("gameDuration")/60)) + "분",
+        "play_duration": str(int(info.get("gameDuration") / 60)) + "분",
         "kda": {
             "kills": kills,
             "deaths": deaths,
@@ -157,7 +172,11 @@ def get_match_info(match_id: str, puuid: str) -> Dict[str, Any]:
         "spells": [participant.get("summoner1Id"), participant.get("summoner2Id")],
         "items": [participant.get(f"item{i}") for i in range(7)],
         "teammates_and_opponents": [
-            {"summoner_name": p.get("riotIdGameName"), "champion": p.get("championName"), "team_id": p.get("teamId")}
+            {
+                "summoner_name": p.get("riotIdGameName"),
+                "champion": p.get("championName"),
+                "team_id": p.get("teamId"),
+            }
             for p in info.get("participants", [])
         ],
         "champion_name": participant.get("championName"),
@@ -168,16 +187,22 @@ def get_match_info(match_id: str, puuid: str) -> Dict[str, Any]:
 
 
 async def get_recent_matches(
-        puuid: str,
-        queue_id,
-        count_start,
-        match_count,
+    puuid: str,
+    queue_id,
+    count_start,
+    match_count,
 ) -> tuple[Dict[str, Any], List[Dict[str, Any]]]:
 
     if queue_id:
-        matchlist_url = f"{ASIA_BASE_URL}/lol/match/v5/matches/by-puuid/{puuid}/ids?start={count_start}&count={match_count}&queue={queue_id}&api_key={RIOT_API_KEY}"
+        matchlist_url = (
+            f"{ASIA_BASE_URL}/lol/match/v5/matches/by-puuid/{puuid}/"
+            f"ids?start={count_start}&count={match_count}&queue={queue_id}&api_key={RIOT_API_KEY}"
+        )
     else:
-        matchlist_url = f"{ASIA_BASE_URL}/lol/match/v5/matches/by-puuid/{puuid}/ids?start={count_start}&count={match_count}&api_key={RIOT_API_KEY}"
+        matchlist_url = (
+            f"{ASIA_BASE_URL}/lol/match/v5/matches/by-puuid/{puuid}/"
+            f"ids?start={count_start}&count={match_count}&api_key={RIOT_API_KEY}"
+        )
         print(f"매치 ID {match_count}개 가져오는 중...")
     response = requests.get(matchlist_url)
     if response.status_code != 200:
@@ -191,8 +216,8 @@ async def get_recent_matches(
     total_kills = 0
     total_deaths = 0
     total_assists = 0
-    position_counts = {}
-    champion_counts = {} # 챔피언 플레이 횟수를 저장할 딕셔너리 추가
+    position_counts: dict = {}
+    champion_counts: dict = {}  # 챔피언 플레이 횟수를 저장할 딕셔너리 추가
     all_processed_matches = []  # 모든 매치 데이터를 저장할 리스트
 
     print(f"매치 {total_games}개 상세 정보 조회 시작...")
@@ -223,9 +248,7 @@ async def get_recent_matches(
 
     win_rate = (total_wins / total_games) * 100 if total_games > 0 else 0
     sorted_champions = sorted(
-        champion_counts.items(),
-        key=lambda item: item[1],
-        reverse=True
+        champion_counts.items(), key=lambda item: item[1], reverse=True
     )
 
     if total_deaths > 0:
@@ -233,7 +256,9 @@ async def get_recent_matches(
     else:
         avg_kda = total_kills + total_assists
 
-    most_played_position = max(position_counts, key=position_counts.get)
+    most_played_position = max(
+        position_counts, key=lambda positions: position_counts[positions]
+    )
 
     summary = {
         "총 매치 수": total_games,
