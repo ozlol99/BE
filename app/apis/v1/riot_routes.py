@@ -43,7 +43,7 @@ async def search_summoner(
         summoner_name,
         tag_line
     )
-    recent_matches = await get_recent_matches(
+    recent_matches_summary, recent_matches = await get_recent_matches(
         summoner_info["puuid"],
         queue_id,
         count_start,
@@ -52,9 +52,9 @@ async def search_summoner(
 
 
     return {
-        "summoner_info": summoner_info,
-        "rank_info": rank_info,
-        "highest_rank": highest_rank,
-        "match_summary": "recent_matches_summary",
-        "recent_matches": recent_matches,
+        "(1) summoner_info": summoner_info,
+        "(2) rank_info": rank_info,
+        "(3) highest_rank": highest_rank,
+        "(4) match_summary": recent_matches_summary,
+        "(5) recent_matches": recent_matches,
     }
