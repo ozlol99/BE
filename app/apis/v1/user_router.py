@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi.responses import JSONResponse
 from tortoise.exceptions import IntegrityError
 
 from app.dtos.user_dto import UserDTO, UserUpdate
@@ -33,10 +34,12 @@ async def register_user(
             birthday=user_data.birthday,
             likes=0,
         )
-        response = Response(status_code=status.HTTP_201_CREATED)
         access_token = create_access_token(data={"sub": new_user.email})
         refresh_token = await create_refresh_token(new_user)
-        response.set_cookie(key="access_token", value=access_token, httponly=False)
+        response = JSONResponse(
+            content={"access_token": access_token, "token_type": "bearer"},
+            status_code=status.HTTP_201_CREATED,
+        )
         response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
         cookie.delete_from_response(response)
         return response

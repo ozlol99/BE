@@ -11,6 +11,7 @@ TORTOISE_APP_MODELS: list[str] = [
     "app.models.RSO_user",
     "app.models.refresh_token",
     "app.models.search_summoner",
+    "app.models.chat_room",
 ]
 
 TORTOISE_ORM = {
