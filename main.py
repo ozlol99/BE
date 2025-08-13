@@ -37,4 +37,3 @@ app.include_router(google_auth_router)
 app.include_router(user_router)
 app.include_router(riot_router)
 app.include_router(chat_router)
-

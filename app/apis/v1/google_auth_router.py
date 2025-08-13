@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Response, status
 from fastapi.responses import RedirectResponse
-from starlette.responses import JSONResponse
 
 from app.models.refresh_token import RefreshTokenModel
 from app.models.user import UserModel
@@ -9,10 +8,11 @@ from app.services.google_login import (
     request_google_token,
 )
 from app.services.social_auth_session import set_cookie_by_email
-from app.services.token_service import create_access_token, create_refresh_token
+from app.services.token_service import create_refresh_token
 
 router = APIRouter(prefix="", tags=["google-login"])
 BASE_URL = "http://localhost:8000"
+
 
 @router.get("/google-login", description="Auth-Code")
 async def google_auth(code: str, response: Response):
@@ -22,7 +22,6 @@ async def google_auth(code: str, response: Response):
 
     if user:
         await RefreshTokenModel.filter(user=user).delete()
-        access_token = create_access_token(data={"sub": user.email})
         refresh_token = await create_refresh_token(user)
         redirect_response = RedirectResponse(
             url=f"{BASE_URL}",
