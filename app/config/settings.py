@@ -1,12 +1,13 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
-    db_host:str
-    db_user:str
-    db_password:str
-    db_database:str
-    db_port:int
+    db_host: str
+    db_user: str
+    db_password: str
+    db_database: str
+    db_port: int
 
     kakao_rest_api_key: str
 
@@ -23,9 +24,7 @@ class Settings(BaseSettings):
     riot_api_key: str
     riot_txt: str = Field(alias="riot.txt")
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8"
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
 
 settings = Settings()

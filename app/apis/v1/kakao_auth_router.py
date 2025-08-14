@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Response, status
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from app.models.refresh_token import RefreshTokenModel
 from app.models.user import UserModel
@@ -24,11 +24,11 @@ async def kakao_auth(code: str, response: Response):
         response_data = {
             "access_token": access_token,
             "token_type": "bearer",
-            "redirect_url": f"{BASE_URL}/user/{user.id}"
+            "redirect_url": f"{BASE_URL}/user/{user.id}",
         }
         response_with_redirection = JSONResponse(
             content=response_data,
-            status_code=status.HTTP_200_OK  # 리디렉션 상태 코드가 아님
+            status_code=status.HTTP_200_OK,  # 리디렉션 상태 코드가 아님
         )
         response_with_redirection.set_cookie(
             key="refresh_token", value=refresh_token, httponly=True
