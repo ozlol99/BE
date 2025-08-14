@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Response, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 
-from app.models.refresh_token import RefreshTokenModel, JSONResponse
+from app.models.refresh_token import RefreshTokenModel
 from app.models.user import UserModel
 from app.services.kakao_login import get_kakao_profile, request_kakao_token
 from app.services.social_auth_session import set_cookie_by_email
