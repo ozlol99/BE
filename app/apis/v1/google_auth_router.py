@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Response, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 
 from app.models.refresh_token import RefreshTokenModel
 from app.models.user import UserModel
@@ -13,6 +13,7 @@ from app.services.token_service import create_refresh_token, create_access_token
 router = APIRouter(prefix="", tags=["google-login"])
 BASE_URL = "http://localhost:8000"
 
+# https://accounts.google.com/o/oauth2/v2/auth?response_type=code&scope=openid%20email&client_id=281980891262-7nagpvldql6sg5ejlvsecps9gvlsdcqj.apps.googleusercontent.com&redirect_uri=http://localhost:8000/google-login
 
 @router.get("/google-login", description="Auth-Code")
 async def google_auth(code: str, response: Response):
@@ -24,15 +25,19 @@ async def google_auth(code: str, response: Response):
         await RefreshTokenModel.filter(user=user).delete()
         access_token = create_access_token(data={"sub": user.email})
         refresh_token = await create_refresh_token(user)
-        redirect_response = RedirectResponse(
-            url=f"{BASE_URL}/user/{user.id}",
-            status_code=status.HTTP_307_TEMPORARY_REDIRECT,
+        response_data = {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "redirect_url": f"{BASE_URL}/user/{user.id}"
+        }
+        response_with_redirection = JSONResponse(
+            content=response_data,
+            status_code=status.HTTP_200_OK  # 리디렉션 상태 코드가 아님
         )
-        redirect_response.set_cookie(key="access_token", value=access_token)
-        redirect_response.set_cookie(
+        response_with_redirection.set_cookie(
             key="refresh_token", value=refresh_token, httponly=True
         )
-        return redirect_response
+        return response_with_redirection
 
     else:
         redirect_response = RedirectResponse(
@@ -45,4 +50,3 @@ async def google_auth(code: str, response: Response):
         return response_with_session
 
 
-# https://accounts.google.com/o/oauth2/v2/auth?response_type=code&scope=openid%20email&client_id=281980891262-7nagpvldql6sg5ejlvsecps9gvlsdcqj.apps.googleusercontent.com&redirect_uri=http://localhost:8000/google-login
