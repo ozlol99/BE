@@ -8,7 +8,7 @@ from app.services.google_login import (
     request_google_token,
 )
 from app.services.social_auth_session import set_cookie_by_email
-from app.services.token_service import create_refresh_token
+from app.services.token_service import create_refresh_token, create_access_token
 
 router = APIRouter(prefix="", tags=["google-login"])
 BASE_URL = "http://localhost:8000"
@@ -22,11 +22,13 @@ async def google_auth(code: str, response: Response):
 
     if user:
         await RefreshTokenModel.filter(user=user).delete()
+        access_token = create_access_token(data={"sub": user.email})
         refresh_token = await create_refresh_token(user)
         redirect_response = RedirectResponse(
-            url=f"{BASE_URL}",
+            url=f"{BASE_URL}/user/{user.id}",
             status_code=status.HTTP_307_TEMPORARY_REDIRECT,
         )
+        redirect_response.set_cookie(key="access_token", value=access_token)
         redirect_response.set_cookie(
             key="refresh_token", value=refresh_token, httponly=True
         )
