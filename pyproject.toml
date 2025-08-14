@@ -29,6 +29,7 @@ dependencies = [
     "itsdangerous>=2.2.0",
     "fastapi-sessions>=0.3.2",
     "websockets>=15.0.1",
+    "pydantic-settings>=2.10.1",
 ]
 
 [tool.setuptools]

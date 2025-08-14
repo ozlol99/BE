@@ -2,7 +2,17 @@ from fastapi import FastAPI
 from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
 
-from setting import DATABASE_URL
+from app.config.settings import Settings
+
+settings = Settings()
+
+
+# TortoiseORM DB URL
+DATABASE_URL = (
+    f"mysql://{settings.db_user}:{settings.db_password}@"
+    f"{settings.db_host}:{settings.db_port}/{settings.db_database}"
+)
+
 
 TORTOISE_APP_MODELS: list[str] = [
     "aerich.models",

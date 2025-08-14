@@ -8,6 +8,7 @@ from app.services.summoner_search_service import (
     get_rank_info,
     get_recent_matches,
     get_summoner_info,
+    update_highest_rank,
 )
 
 router = APIRouter(prefix="/riot", tags=["RIOT APIs"])
@@ -34,17 +35,23 @@ async def search_summoner(
     count_start: int = 0,  # 👈 쿼리 파라미터로 start를 받음
     match_count: int = 20,  # 👈 쿼리 파라미터로 count를 받음
 ):
+
     summoner_info = await get_summoner_info(summoner_name, tag_line)
     rank_info = await get_rank_info(summoner_info["puuid"])
-    recent_matches = await get_recent_matches(
+    highest_rank = await update_highest_rank(
+        rank_info, summoner_info["puuid"], summoner_name, tag_line
+    )
+    recent_matches_summary, recent_matches = await get_recent_matches(
         summoner_info["puuid"],
         queue_id,
         count_start,
         match_count,
     )
+
     return {
-        "summoner_info": summoner_info,
-        "rank_info": rank_info,
-        "match_summary": "recent_matches_summary",
-        "recent_matches": recent_matches,
+        "(1) summoner_info": summoner_info,
+        "(2) rank_info": rank_info,
+        "(3) highest_rank": highest_rank,
+        "(4) match_summary": recent_matches_summary,
+        "(5) recent_matches": recent_matches,
     }
