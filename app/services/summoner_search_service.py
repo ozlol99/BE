@@ -1,9 +1,11 @@
+import datetime
 import os
 from typing import TYPE_CHECKING, Any, Dict, List
 
 import httpx
 import requests
 from fastapi import HTTPException, status
+from tortoise.exceptions import DoesNotExist
 
 from app.models.search_summoner import RtSearchModel
 from app.utils.timestamp import format_time_ago
@@ -41,13 +43,6 @@ async def get_summoner_info(summoner_name: str, tag_line: str):
             res2.raise_for_status()
             summoner_data = res2.json()
         # DB에 바로 저장, 바로 검색을 위해
-        await RtSearchModel.get_or_create(
-            puuid=puuid,
-            defaults={
-                "summoner_name": summoner_name,
-                "tag_line": tag_line,
-            },
-        )
 
         return {
             "summonerId": summoner_data.get("id"),
@@ -272,3 +267,96 @@ async def get_recent_matches(
     }
 
     return summary, all_processed_matches
+
+
+# 'UNRANKED'를 포함하여 티어에 우선순위를 부여합니다.
+TIER_ORDER = {
+    "UNRANKED": -1,
+    "IRON": 0,
+    "BRONZE": 1,
+    "SILVER": 2,
+    "GOLD": 3,
+    "PLATINUM": 4,
+    "EMERALD": 5,
+    "DIAMOND": 6,
+    "MASTER": 7,
+    "GRANDMASTER": 8,
+    "CHALLENGER": 9,
+}
+
+RANK_ORDER = {"IV": 0, "III": 1, "II": 2, "I": 3}
+
+
+def get_rank_value(tier, rank):
+    """티어와 랭크를 기준으로 순위 값을 반환합니다."""
+    tier_value = TIER_ORDER.get(tier, -1)
+    rank_value = RANK_ORDER.get(rank, -1)
+    return tier_value * 4 + rank_value
+
+
+async def update_highest_rank(current_rank_info, puuid, summoner_name, tag_line):
+
+    solo_rank_data = current_rank_info.get("solo_rank", {})
+    flex_rank_data = current_rank_info.get("flex_rank", {})
+    current_solo_tier = solo_rank_data.get("tier", "UNRANKED")
+    current_solo_rank = solo_rank_data.get("rank", "IV")
+    current_solo_lp = solo_rank_data.get("league_points", 0)
+    current_flex_tier = flex_rank_data.get("tier", "UNRANKED")
+    current_flex_rank = flex_rank_data.get("rank", "IV")
+    current_flex_lp = flex_rank_data.get("league_points", 0)
+
+    try:
+        highest_rank_data = await RtSearchModel.get(puuid=puuid)
+        current_solo_value = get_rank_value(current_solo_tier, current_solo_rank)
+        highest_solo_value = get_rank_value(
+            highest_rank_data.highest_solo_tier, highest_rank_data.highest_solo_rank
+        )
+
+        is_new_solo_rank_higher = False
+        if current_solo_value > highest_solo_value:
+            is_new_solo_rank_higher = True
+        elif (
+            current_solo_value == highest_solo_value
+            and current_solo_lp > highest_rank_data.highest_solo_lp
+        ):
+            is_new_solo_rank_higher = True
+
+        if is_new_solo_rank_higher:
+            highest_rank_data.highest_solo_tier = current_solo_tier
+            highest_rank_data.highest_solo_rank = current_solo_rank
+            highest_rank_data.highest_solo_lp = current_solo_lp
+
+        current_flex_value = get_rank_value(current_flex_tier, current_flex_rank)
+        highest_flex_value = get_rank_value(
+            highest_rank_data.highest_flex_tier, highest_rank_data.highest_flex_rank
+        )
+
+        is_new_flex_rank_higher = False
+        if current_flex_value > highest_flex_value:
+            is_new_flex_rank_higher = True
+        elif (
+            current_flex_value == highest_flex_value
+            and current_flex_lp > highest_rank_data.highest_flex_lp
+        ):
+            is_new_flex_rank_higher = True
+        if is_new_flex_rank_higher:
+            highest_rank_data.highest_flex_tier = current_flex_tier
+            highest_rank_data.highest_flex_rank = current_flex_rank
+            highest_rank_data.highest_flex_lp = current_flex_lp
+        await highest_rank_data.save()
+        return highest_rank_data
+
+    except DoesNotExist:
+        new_rank_entry = await RtSearchModel.create(
+            puuid=puuid,
+            summoner_name=summoner_name,
+            tag_line=tag_line,
+            highest_solo_tier=current_solo_tier,
+            highest_solo_rank=current_solo_rank,
+            highest_solo_lp=current_solo_lp,
+            highest_flex_tier=current_flex_tier,
+            highest_flex_rank=current_flex_rank,
+            highest_flex_lp=current_flex_lp,
+            updated_at=datetime.datetime.now(),
+        )
+        return new_rank_entry
