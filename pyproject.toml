@@ -30,6 +30,9 @@ dependencies = [
     "fastapi-sessions>=0.3.2",
     "websockets>=15.0.1",
     "pydantic-settings>=2.10.1",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+    "pytest-mock>=3.14.1",
 ]
 
 [tool.setuptools]
