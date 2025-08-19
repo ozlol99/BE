@@ -10,6 +10,9 @@ from app.config.settings import Settings
 from app.models.search_summoner import RtSearchModel
 from app.utils.timestamp import format_time_ago
 
+if TYPE_CHECKING:
+    pass
+
 settings = Settings()
 
 ASIA_BASE_URL = "https://asia.api.riotgames.com"
