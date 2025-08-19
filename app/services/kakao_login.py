@@ -1,14 +1,12 @@
-import os
-
-import dotenv
 import requests
 from fastapi import HTTPException
+
 from app.config.settings import Settings
 
 settings = Settings()
 BASE_URL = settings.base_url
 
-KAKAO_REST_API_KEY = settings.kakao_api_key
+KAKAO_REST_API_KEY = settings.kakao_rest_api_key
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
 
 

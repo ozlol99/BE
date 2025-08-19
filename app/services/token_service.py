@@ -1,14 +1,13 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-import dotenv
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 
+from app.config.settings import Settings
 from app.models.refresh_token import RefreshTokenModel
 from app.models.user import UserModel
-from app.config.settings import Settings
 
 settings = Settings()
 
@@ -29,6 +28,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
 async def create_refresh_token(user: UserModel):
     refresh_token_expires = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     refresh_token_payload = {
@@ -38,6 +38,7 @@ async def create_refresh_token(user: UserModel):
     refresh_token = jwt.encode(refresh_token_payload, SECRET_KEY, algorithm=ALGORITHM)
     await RefreshTokenModel.create(user=user, token=refresh_token)
     return refresh_token
+
 
 async def get_current_user(
     request: Request, token: Optional[str] = Depends(oauth2_scheme)
@@ -81,6 +82,7 @@ async def get_current_user(
             detail="유효하지 않은 토큰입니다.",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
 
 def verify_access_token(token: str) -> Optional[dict]:
     try:

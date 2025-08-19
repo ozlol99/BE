@@ -5,7 +5,8 @@ from fastapi import WebSocket
 
 
 class ConnectionManager:
-    def __init__(self):
+    # __init__ 함수에 타입 힌트를 추가합니다.
+    def __init__(self) -> None:
         # { "room_id": [WebSocket, WebSocket, ...] }
         self.active_connections: Dict[str, List[WebSocket]] = {}
 

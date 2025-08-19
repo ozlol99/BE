@@ -1,6 +1,8 @@
 from typing import Any, Dict, cast
+
 import requests
 from fastapi import HTTPException, status
+
 from app.config.settings import Settings
 
 settings = Settings()

@@ -1,20 +1,21 @@
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import Any, Dict, List
 
 import httpx
 import requests
 from fastapi import HTTPException, status
 from tortoise.exceptions import DoesNotExist
 
+from app.config.settings import Settings
 from app.models.search_summoner import RtSearchModel
 from app.utils.timestamp import format_time_ago
-from app.config.settings import Settings
 
 settings = Settings()
 
 ASIA_BASE_URL = "https://asia.api.riotgames.com"
 KR_BASE_URL = "https://kr.api.riotgames.com"
 RIOT_API_KEY = settings.riot_api_key
+
 
 async def get_summoner_info(summoner_name: str, tag_line: str):
     if not RIOT_API_KEY:

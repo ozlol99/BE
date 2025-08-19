@@ -11,6 +11,7 @@ class SessionData(BaseModel):
     email: str
     google_or_kakao: str
 
+
 ############################
 ###### REDIS로 변경##########
 ############################
