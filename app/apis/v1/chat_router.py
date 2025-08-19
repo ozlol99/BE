@@ -1,14 +1,14 @@
 import time
 from typing import List, Optional
+
 from fastapi import (
     APIRouter,
     Depends,
-    HTTPException,
     Query,
+    Response,
     WebSocket,
     WebSocketDisconnect,
     status,
-    Response,
 )
 
 # DTO Import
@@ -19,10 +19,10 @@ from app.dtos.chat_dto import (
     ChatRoomUpdate,
     JoinRoomRequest,
 )
+from app.models.chat_room_participant import ChatRoomParticipant
 
 # Model Imports
 from app.models.user import UserModel
-from app.models.chat_room_participant import ChatRoomParticipant
 
 # Service Imports
 from app.services import chat_service
@@ -33,7 +33,10 @@ router = APIRouter(prefix="/chat", tags=["Chat"])
 
 # CRUD Endpoints
 
-@router.post("/rooms", status_code=status.HTTP_201_CREATED, response_model=ChatRoomDetailResponse)
+
+@router.post(
+    "/rooms", status_code=status.HTTP_201_CREATED, response_model=ChatRoomDetailResponse
+)
 async def create_room(
     room_data: ChatRoomCreate, current_user: UserModel = Depends(get_current_user)
 ):
@@ -62,7 +65,9 @@ async def update_room(
 
 
 @router.delete("/rooms/{room_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_room(room_id: int, current_user: UserModel = Depends(get_current_user)):
+async def delete_room(
+    room_id: int, current_user: UserModel = Depends(get_current_user)
+):
     await chat_service.delete_chat_room(room_id, current_user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -85,35 +90,43 @@ async def leave_room(room_id: int, current_user: UserModel = Depends(get_current
 
 # WebSocket Endpoint
 
-async def get_participant_from_token(token: str, room_id: int) -> Optional[ChatRoomParticipant]:
+
+async def get_participant_from_token(
+    token: str, room_id: int
+) -> Optional[ChatRoomParticipant]:
     try:
         payload = verify_access_token(token)
         if not payload or "sub" not in payload:
             return None
-        
+
         user = await UserModel.get_or_none(email=payload["sub"])
         if not user:
             return None
-            
-        participant = await ChatRoomParticipant.get(room_id=room_id, user=user).prefetch_related("riot_account")
+
+        participant = await ChatRoomParticipant.get(
+            room_id=room_id, user=user
+        ).prefetch_related("riot_account", "user")
         return participant
     except Exception:
         return None
 
+
 @router.websocket("/ws/{room_id}")
-async def websocket_endpoint(websocket: WebSocket, room_id: int, token: str = Query(...)):
+async def websocket_endpoint(
+    websocket: WebSocket, room_id: int, token: str = Query(...)
+):
     participant = await get_participant_from_token(token, room_id)
     if not participant:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
 
     await manager.connect(websocket, str(room_id))
-    
+
     join_message = {
         "type": "user_join",
-        "user_id": participant.user_id,
+        "user_id": participant.user.id,
         "username": participant.riot_account.game_name,
-        "timestamp": time.time()
+        "timestamp": time.time(),
     }
     await manager.broadcast(join_message, str(room_id))
 
@@ -122,18 +135,18 @@ async def websocket_endpoint(websocket: WebSocket, room_id: int, token: str = Qu
             data = await websocket.receive_text()
             message = {
                 "type": "chat_message",
-                "sender_id": participant.user_id,
+                "sender_id": participant.user.id,
                 "username": participant.riot_account.game_name,
                 "content": data,
-                "timestamp": time.time()
+                "timestamp": time.time(),
             }
             await manager.broadcast(message, str(room_id))
     except WebSocketDisconnect:
         manager.disconnect(websocket, str(room_id))
         leave_message = {
             "type": "user_leave",
-            "user_id": participant.user_id,
+            "user_id": participant.user.id,
             "username": participant.riot_account.game_name,
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
         await manager.broadcast(leave_message, str(room_id))

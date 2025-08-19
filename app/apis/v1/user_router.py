@@ -1,18 +1,19 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.responses import JSONResponse
-from tortoise.exceptions import IntegrityError, DoesNotExist
-from typing import List
 from pydantic import BaseModel
+from tortoise.exceptions import DoesNotExist, IntegrityError
 
 from app.dtos.user_dto import UserDTO, UserUpdate
 from app.models.refresh_token import RefreshTokenModel
-from app.models.user import UserModel
 from app.models.riot_account import RiotAccount
+from app.models.user import UserModel
+from app.services import summoner_search_service
 from app.services.google_login import request_google_token
 from app.services.kakao_login import request_kakao_token
 from app.services.social_auth_session import SessionData, cookie, get_data_from_cookie
 from app.services.social_unlink import unlink_social_account
-from app.services import summoner_search_service
 from app.services.token_service import (
     create_access_token,
     create_refresh_token,
@@ -27,6 +28,7 @@ router = APIRouter(prefix="/user", tags=["user"])
 class RiotAccountCreate(BaseModel):
     game_name: str
     tag_line: str
+
 
 class RiotAccountResponse(BaseModel):
     id: int
@@ -123,7 +125,11 @@ async def handle_like(from_user_id: int, to_user_id: int):
 
 
 # Riot Account Management Endpoints
-@router.post("/riot-accounts", status_code=status.HTTP_201_CREATED, response_model=RiotAccountResponse)
+@router.post(
+    "/riot-accounts",
+    status_code=status.HTTP_201_CREATED,
+    response_model=RiotAccountResponse,
+)
 async def link_riot_account(
     account_data: RiotAccountCreate,
     current_user: UserModel = Depends(get_current_user),
@@ -178,5 +184,6 @@ async def unlink_riot_account(
 
     except DoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Riot account not found or you don't have permission to unlink it."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Riot account not found or you don't have permission to unlink it.",
         )
