@@ -6,22 +6,17 @@ build-backend = "setuptools.build_meta"
 name = "lol99"
 version = "0.1.0"
 description = "Add your description here"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "aerich>=0.9.1",
-    "black>=25.1.0",
     "docker>=7.1.0",
     "dotenv>=0.9.9",
     "fastapi>=0.116.1",
     "httpx>=0.28.1",
-    "mypy>=1.17.1",
-    "ruff>=0.12.7",
     "tortoise-orm>=0.25.1",
     "uvicorn>=0.35.0",
     "aiomysql>=0.2.0",
-    "isort>=5.13.2",
     "cryptography>=45.0.5",
-    "types-requests>=2.32.4.20250611",
     "asyncpg>=0.30.0",
     "python-jose>=3.3.0",
     "python-dotenv>=1.0.0",
@@ -30,6 +25,15 @@ dependencies = [
     "fastapi-sessions>=0.3.2",
     "websockets>=15.0.1",
     "pydantic-settings>=2.10.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.12.7",
+    "mypy>=1.17.1",
+    "black>=25.1.0",
+    "isort>=5.13.2",
+    "types-requests>=2.32.4.20250611"
 ]
 
 [tool.setuptools]
@@ -69,4 +73,3 @@ exclude = ["build", "migrations", "venv", ".venv"]
 [[tool.mypy.overrides]]
 module = "app.*"
 follow_imports = "normal"
-

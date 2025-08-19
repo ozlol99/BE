@@ -1,20 +1,20 @@
-import os
 from datetime import datetime, timedelta
 from typing import Optional
 
-import dotenv
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 
+from app.config.settings import Settings
 from app.models.refresh_token import RefreshTokenModel
 from app.models.user import UserModel
 
-dotenv.load_dotenv()
-SECRET_KEY = os.environ.get("SECRET_KEY")
-ALGORITHM = os.environ.get("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES"))  # type: ignore
-REFRESH_TOKEN_EXPIRE_DAYS = int(os.environ.get("REFRESH_TOKEN_EXPIRE_DAYS"))  # type: ignore
+settings = Settings()
+
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = int(settings.access_token_expire_minutes)  # type: ignore
+REFRESH_TOKEN_EXPIRE_DAYS = int(settings.refresh_token_expire_days)  # type: ignore
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 
