@@ -36,5 +36,4 @@ class ConnectionManager:
             return len(self.active_connections[room_id])
         return 0
 
-
 manager = ConnectionManager()
