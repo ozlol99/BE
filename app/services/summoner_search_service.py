@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import httpx
 import requests
