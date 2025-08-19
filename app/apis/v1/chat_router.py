@@ -112,9 +112,16 @@ async def get_participant_from_token(
 
 
 @router.websocket("/ws/{room_id}")
-async def websocket_endpoint(
-    websocket: WebSocket, room_id: int, token: str = Query(...)
-):
+async def websocket_endpoint(websocket: WebSocket, room_id: int):
+    auth_header = websocket.headers.get("Authorization")
+    token = None
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ")[1]
+
+    if not token:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+
     participant = await get_participant_from_token(token, room_id)
     if not participant:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
