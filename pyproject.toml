@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "lol99"
 version = "0.1.0"
 description = "Add your description here"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "aerich>=0.9.1",
     "docker>=7.1.0",

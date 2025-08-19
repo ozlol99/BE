@@ -1,7 +1,9 @@
-# .github/workflows/checks.yml
+ # .github/workflows/checks.yml
 
 name: Code Quality Checks
 
+# 트리거 이벤트 부분
+# 코드가 푸시되거나 풀 리퀘스트가 생성될 때 CI가 실행됩니다.
 on:
   push:
     branches:
@@ -10,6 +12,7 @@ on:
 
 jobs:
   ci:
+    # 가장 최신버전의 ubuntu를 OS 환경으로 설정합니다.
     runs-on: ubuntu-latest
 
     # services 키워드를 사용하여 MySQL 서비스를 설정
@@ -18,28 +21,36 @@ jobs:
         image: mysql:8.0
         ports:
           - 3306:3306
+        # Github Secrets에서 가져와서 env로 등록, MySQL 데이터베이스 연결 설정
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: 1234
-        options: --health-cmd="mysqladmin ping -h 127.0.0.1 -P 3306" --health-interval=10s --health-timeout=5s --health-retries=5
-
+        # 옵션으로 MySQL의 연결 상태를 확인. 10초 단위로 5번 재시도. 5초간 기다림.
+        
     steps:
+      # CI 환경에서 코드를 체크아웃합니다.
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # CI 환경에서 사용할 파이썬 버전을 지정합니다.
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
 
-      # `uv`를 직접 설치하는 대신, `pip`로 설치하고 가상 환경을 만듭니다.
-      - name: Install uv and dependencies
+      # uv를 설치합니다.
+      - name: Install uv
         run: |
-          pip install uv
-          uv venv
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      # uv를 사용하여 의존성 패키지들을 설치합니다.
+      - name: Install dependencies using uv
+        run: |
           uv pip install ."[dev]" --system
 
-      # ruff, mypy, black은 이제 가상 환경에 설치되어 있으므로 `uv run`으로 실행할 수 있습니다.
+      # ruff로 import 정렬 및 코드 스타일 검사
       - name: Run ruff (Code quality check)
         run: |
           uv run ruff check . 
@@ -48,19 +59,24 @@ jobs:
         run: |
           uv run mypy .
 
+      # black을 사용하여 PEP8 코드스타일을 준수했는지 체크합니다.
       - name: Run black (Code formatting)
         run: |
           uv run black . --check
 
       # db 연결을 테스트
-      - name: Wait for MySQL to be ready
+      - name: Wait for MySQL
         run: |
           while ! mysqladmin ping -h "127.0.0.1" -P 3306 --silent; do
             echo "Waiting for MySQL..."
             sleep 2
           done
-      
-      # .env 환경 변수 설정
-      - name: Set DATABASE_URL environment variable
+      # .env 환경 구성
+      - name: Set environment variables
         run: |
-          echo "DATABASE_URL=mysql+aiomysql://root:1234@127.0.0.1:3306/test" >> $GITHUB_ENV
+          echo "DATABASE_URL=mysql+pymysql://${{ env.DB_USER }}:${{ env.DB_PASSWORD }}@127.0.0.1:${{ env.DB_PORT }}/${{ env.DB_NAME }}" >> $GITHUB_ENV
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PORT: 3306
