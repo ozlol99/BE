@@ -51,7 +51,7 @@ async def get_current_user(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="토큰이 제공되지 않았습니다.",
-            headers={"WWW-Authenticate": "Bearer"},
+            headers={"Authorization": "Bearer"},
         )
     try:
         payload = verify_access_token(token_to_verify)
@@ -59,28 +59,28 @@ async def get_current_user(
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="유효하지 않거나 만료된 토큰입니다.",
-                headers={"WWW-Authenticate": "Bearer"},
+                headers={"Authorization": "Bearer"},
             )
         user_email: str = payload["sub"]
         if user_email is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="토큰에 사용자 정보가 없습니다.",
-                headers={"WWW-Authenticate": "Bearer"},
+                headers={"Authorization": "Bearer"},
             )
         current_user = await UserModel.get_or_none(email=user_email)
         if current_user is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="사용자가 존재하지 않습니다.",
-                headers={"WWW-Authenticate": "Bearer"},
+                headers={"Authorization": "Bearer"},
             )
         return current_user
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="유효하지 않은 토큰입니다.",
-            headers={"WWW-Authenticate": "Bearer"},
+            headers={"Authorization": "Bearer"},
         )
 
 

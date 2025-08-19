@@ -34,11 +34,6 @@ CREATE TABLE IF NOT EXISTS `token_blacklist` (
     `token` VARCHAR(500) NOT NULL UNIQUE COMMENT '블랙 리스트 토큰',
     `created_at` DATETIME(6) NOT NULL COMMENT '생성일' DEFAULT CURRENT_TIMESTAMP(6)
 ) CHARACTER SET utf8mb4;
-CREATE TABLE IF NOT EXISTS `rso_users` (
-    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `user_id` VARCHAR(255) NOT NULL,
-    CONSTRAINT `fk_rso_user_user_87c25ecc` FOREIGN KEY (`user_id`) REFERENCES `user` (`riot_user`) ON DELETE CASCADE
-) CHARACTER SET utf8mb4;
 CREATE TABLE IF NOT EXISTS `refresh_tokens` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `token` VARCHAR(512) NOT NULL UNIQUE,
@@ -64,9 +59,49 @@ CREATE TABLE IF NOT EXISTS `rt_search` (
 CREATE TABLE IF NOT EXISTS `chat_rooms` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL COMMENT '채팅방 이름',
+    `max_members` INT NOT NULL COMMENT '최대 인원수' DEFAULT 5,
     `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    `queue_type` VARCHAR(30) UNIQUE COMMENT 'Queue Type',
     `owner_id` INT NOT NULL COMMENT '방장',
     CONSTRAINT `fk_chat_roo_user_42dc1056` FOREIGN KEY (`owner_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+) CHARACTER SET utf8mb4;
+CREATE TABLE IF NOT EXISTS `hashtags` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(50) NOT NULL UNIQUE COMMENT '해시태그 이름'
+) CHARACTER SET utf8mb4;
+CREATE TABLE IF NOT EXISTS `positions` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(10) NOT NULL UNIQUE COMMENT '포지션 이름 (e.g., TOP, JGL)'
+) CHARACTER SET utf8mb4;
+CREATE TABLE IF NOT EXISTS `riot_accounts` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `game_name` VARCHAR(50) NOT NULL COMMENT '라이엇 게임 이름',
+    `tag_line` VARCHAR(10) NOT NULL COMMENT '태그 라인',
+    `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    `user_id` INT NOT NULL COMMENT '소유자',
+    UNIQUE KEY `uid_riot_accoun_game_na_529e90` (`game_name`, `tag_line`),
+    CONSTRAINT `fk_riot_acc_user_ab0fa5cd` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+) CHARACTER SET utf8mb4;
+CREATE TABLE IF NOT EXISTS `chatroom_participants` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `joined_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    `position_id` INT NOT NULL,
+    `riot_account_id` INT NOT NULL,
+    `room_id` INT NOT NULL,
+    `user_id` INT NOT NULL,
+    UNIQUE KEY `uid_chatroom_pa_room_id_8bbe77` (`room_id`, `user_id`),
+    UNIQUE KEY `uid_chatroom_pa_room_id_306cb3` (`room_id`, `position_id`),
+    CONSTRAINT `fk_chatroom_position_878368bc` FOREIGN KEY (`position_id`) REFERENCES `positions` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_chatroom_riot_acc_84700c3c` FOREIGN KEY (`riot_account_id`) REFERENCES `riot_accounts` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_chatroom_chat_roo_4d97fd1f` FOREIGN KEY (`room_id`) REFERENCES `chat_rooms` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_chatroom_user_00c48193` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+) CHARACTER SET utf8mb4;
+CREATE TABLE IF NOT EXISTS `chatroom_hashtag` (
+    `chat_rooms_id` INT NOT NULL,
+    `hashtag_id` INT NOT NULL,
+    FOREIGN KEY (`chat_rooms_id`) REFERENCES `chat_rooms` (`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`hashtag_id`) REFERENCES `hashtags` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `uidx_chatroom_ha_chat_ro_cb30ba` (`chat_rooms_id`, `hashtag_id`)
 ) CHARACTER SET utf8mb4;"""
 
 

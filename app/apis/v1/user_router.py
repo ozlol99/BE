@@ -1,10 +1,15 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.responses import JSONResponse
-from tortoise.exceptions import IntegrityError
+from pydantic import BaseModel
+from tortoise.exceptions import DoesNotExist, IntegrityError
 
 from app.dtos.user_dto import UserDTO, UserUpdate
 from app.models.refresh_token import RefreshTokenModel
-from app.models.user import UserModel  # 🚨 UserModel 모델을 import
+from app.models.riot_account import RiotAccount
+from app.models.user import UserModel
+from app.services import summoner_search_service
 from app.services.google_login import request_google_token
 from app.services.kakao_login import request_kakao_token
 from app.services.social_auth_session import SessionData, cookie, get_data_from_cookie
@@ -17,6 +22,21 @@ from app.services.token_service import (
 from app.services.user_likes import add_like
 
 router = APIRouter(prefix="/user", tags=["user"])
+
+
+# DTOs for Riot Account Management
+class RiotAccountCreate(BaseModel):
+    game_name: str
+    tag_line: str
+
+
+class RiotAccountResponse(BaseModel):
+    id: int
+    game_name: str
+    tag_line: str
+
+    class Config:
+        from_attributes = True
 
 
 @router.post("/register", description="register")
@@ -102,3 +122,68 @@ async def delete_my_account(
 @router.post("/like/{from_user_id}/{to_user_id}", status_code=status.HTTP_201_CREATED)
 async def handle_like(from_user_id: int, to_user_id: int):
     return await add_like(from_user_id, to_user_id)
+
+
+# Riot Account Management Endpoints
+@router.post(
+    "/riot-accounts",
+    status_code=status.HTTP_201_CREATED,
+    response_model=RiotAccountResponse,
+)
+async def link_riot_account(
+    account_data: RiotAccountCreate,
+    current_user: UserModel = Depends(get_current_user),
+):
+    """Links a Riot account to the current user's profile."""
+    try:
+        # 1. Validate if the Riot account exists using the search service
+        await summoner_search_service.get_summoner_info(
+            account_data.game_name, account_data.tag_line
+        )
+
+        # 2. Create and link the Riot account
+        new_account = await RiotAccount.create(
+            user=current_user,
+            game_name=account_data.game_name,
+            tag_line=account_data.tag_line,
+        )
+        return new_account
+
+    except HTTPException as e:
+        # Re-raise exceptions from the search service (e.g., 404 Not Found)
+        raise e
+    except IntegrityError:
+        # This happens if the game_name#tag_line is already linked in the DB
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This Riot account is already linked.",
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while linking the account.",
+        )
+
+
+@router.get("/riot-accounts", response_model=List[RiotAccountResponse])
+async def get_linked_riot_accounts(current_user: UserModel = Depends(get_current_user)):
+    """Gets a list of Riot accounts linked to the current user."""
+    accounts = await RiotAccount.filter(user=current_user)
+    return [RiotAccountResponse.from_orm(acc) for acc in accounts]
+
+
+@router.delete("/riot-accounts/{account_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def unlink_riot_account(
+    account_id: int, current_user: UserModel = Depends(get_current_user)
+):
+    """Unlinks a Riot account from the current user's profile."""
+    try:
+        account_to_delete = await RiotAccount.get(id=account_id, user=current_user)
+        await account_to_delete.delete()
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    except DoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Riot account not found or you don't have permission to unlink it.",
+        )

@@ -18,10 +18,13 @@ TORTOISE_APP_MODELS: list[str] = [
     "aerich.models",
     "app.models.user",
     "app.models.token_blacklist",
-    "app.models.RSO_user",
     "app.models.refresh_token",
     "app.models.search_summoner",
     "app.models.chat_room",
+    "app.models.hash_tag",
+    "app.models.position",
+    "app.models.riot_account",
+    "app.models.chat_room_participant",
 ]
 
 TORTOISE_ORM = {
