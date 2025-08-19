@@ -14,9 +14,9 @@ from app.services.token_service import create_access_token, create_refresh_token
 router = APIRouter(prefix="", tags=["google-login"])
 settings = Settings()
 BASE_URL = settings.base_url
+MAIN_PAGE = "https://lol99.kro.kr/"
 
-# https://accounts.google.com/o/oauth2/v2/auth?response_type=code&scope=openid%20email&client_id=281980891262-7nagpvldql6sg5ejlvsecps9gvlsdcqj.apps.googleusercontent.com&redirect_uri=http://localhost:8000/google-login
-
+# https://accounts.google.com/o/oauth2/v2/auth?response_type=&scope=openid%20email&client_id=281980891262-7nagpvldql6sg5ejlvsecps9gvlsdcqj.apps.googleusercontent.com&redirect_uri=http://localhost:8000/google-login
 
 @router.get("/google-login", description="Auth-Code")
 async def google_auth(code: str, response: Response):
@@ -31,7 +31,7 @@ async def google_auth(code: str, response: Response):
         response_data = {
             "access_token": access_token,
             "token_type": "bearer",
-            "redirect_url": f"{BASE_URL}/user/{user.id}",
+            "redirect_url": f"{MAIN_PAGE}",
         }
         response_with_redirection = JSONResponse(
             content=response_data,

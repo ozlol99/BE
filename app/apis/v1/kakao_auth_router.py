@@ -11,7 +11,7 @@ from app.services.token_service import create_access_token, create_refresh_token
 router = APIRouter(prefix="", tags=["kakao-user"])
 settings = Settings()
 BASE_URL = settings.base_url
-
+MAIN_PAGE = "https://lol99.kro.kr/"
 
 @router.get("/kakao-login", description="Auth-Code")
 async def kakao_auth(code: str, response: Response):
@@ -26,7 +26,7 @@ async def kakao_auth(code: str, response: Response):
         response_data = {
             "access_token": access_token,
             "token_type": "bearer",
-            "redirect_url": f"{BASE_URL}/user/{user.id}",
+            "redirect_url": f"{MAIN_PAGE}",
         }
         response_with_redirection = JSONResponse(
             content=response_data,
