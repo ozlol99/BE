@@ -48,4 +48,4 @@ async def kakao_auth(code: str, response: Response):
         return response_with_session
 
 
-# https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a04159cc219d093bdcde9d55ea4b88fc&redirect_uri=http://3.34.53.80:8000/kakao-login
+# https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a04159cc219d093bdcde9d55ea4b88fc&redirect_uri=http://localhost:8000/kakao-login

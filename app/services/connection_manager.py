@@ -1,20 +1,23 @@
 import json
 from typing import Dict, List
+from collections import defaultdict
 
 from fastapi import WebSocket
 
 
 class ConnectionManager:
-    # __init__ 함수에 타입 힌트를 추가합니다.
     def __init__(self) -> None:
-        # { "room_id": [WebSocket, WebSocket, ...] }
-        self.active_connections: Dict[str, List[WebSocket]] = {}
+        self.active_connections: Dict[str, List[WebSocket]] = defaultdict(list)
+        self.history: Dict[str, List[dict]] = defaultdict(list)
 
     async def connect(self, websocket: WebSocket, room_id: str):
         await websocket.accept()
-        if room_id not in self.active_connections:
-            self.active_connections[room_id] = []
         self.active_connections[room_id].append(websocket)
+
+        # Send chat history to the newly connected user
+        if room_id in self.history:
+            for message in self.history[room_id]:
+                await websocket.send_text(json.dumps(message))
 
     def disconnect(self, websocket: WebSocket, room_id: str):
         if (
@@ -22,11 +25,16 @@ class ConnectionManager:
             and websocket in self.active_connections[room_id]
         ):
             self.active_connections[room_id].remove(websocket)
-            # 방에 아무도 없으면 방 목록에서 제거
+            # If the room is empty, clear the connection and history
             if not self.active_connections[room_id]:
                 del self.active_connections[room_id]
+                if room_id in self.history:
+                    del self.history[room_id]
 
     async def broadcast(self, message: dict, room_id: str):
+        # Store message in history before broadcasting
+        self.history[room_id].append(message)
+
         if room_id in self.active_connections:
             for connection in self.active_connections[room_id]:
                 await connection.send_text(json.dumps(message))
