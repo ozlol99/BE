@@ -1,12 +1,12 @@
-import os
 from typing import Any, Dict, cast
-
 import requests
 from fastapi import HTTPException, status
+from app.config.settings import Settings
 
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
-GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI")
+settings = Settings()
+GOOGLE_CLIENT_ID = settings.google_client_id
+GOOGLE_CLIENT_SECRET = settings.google_client_secret
+GOOGLE_REDIRECT_URI = settings.google_redirect_uri
 
 
 def request_google_token(code: str, detail_url) -> Dict[str, Any]:

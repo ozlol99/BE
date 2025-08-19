@@ -11,7 +11,9 @@ class SessionData(BaseModel):
     email: str
     google_or_kakao: str
 
-
+############################
+###### REDIS로 변경##########
+############################
 # 2. 세션 백엔드(저장소) 생성
 backend = InMemoryBackend[UUID, SessionData]()
 

@@ -6,9 +6,12 @@ from app.models.user import UserModel
 from app.services.kakao_login import get_kakao_profile, request_kakao_token
 from app.services.social_auth_session import set_cookie_by_email
 from app.services.token_service import create_access_token, create_refresh_token
+from app.config.settings import Settings
+
 
 router = APIRouter(prefix="", tags=["kakao-user"])
-BASE_URL = "http://localhost:8000"
+settings = Settings()
+BASE_URL = settings.base_url
 
 
 @router.get("/kakao-login", description="Auth-Code")
@@ -46,4 +49,4 @@ async def kakao_auth(code: str, response: Response):
         return response_with_session
 
 
-# https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a04159cc219d093bdcde9d55ea4b88fc&redirect_uri=http://127.0.0.1:8000/kakao-login
+# https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a04159cc219d093bdcde9d55ea4b88fc&redirect_uri=http://3.34.53.80:8000/kakao-login

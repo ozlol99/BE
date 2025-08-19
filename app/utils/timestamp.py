@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 
-
 def format_time_ago(timestamp_ms: int) -> str:
     """
     주어진 유닉스 타임스탬프(밀리초)를 현재 시간과 비교하여 "방금 전", "N분 전" 등으로 표현합니다.

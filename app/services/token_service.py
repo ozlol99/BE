@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -9,12 +8,14 @@ from jose import jwt
 
 from app.models.refresh_token import RefreshTokenModel
 from app.models.user import UserModel
+from app.config.settings import Settings
 
-dotenv.load_dotenv()
-SECRET_KEY = os.environ.get("SECRET_KEY")
-ALGORITHM = os.environ.get("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES"))  # type: ignore
-REFRESH_TOKEN_EXPIRE_DAYS = int(os.environ.get("REFRESH_TOKEN_EXPIRE_DAYS"))  # type: ignore
+settings = Settings()
+
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = int(settings.access_token_expire_minutes)  # type: ignore
+REFRESH_TOKEN_EXPIRE_DAYS = int(settings.refresh_token_expire_days)  # type: ignore
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 
@@ -28,7 +29,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-
 async def create_refresh_token(user: UserModel):
     refresh_token_expires = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     refresh_token_payload = {
@@ -38,7 +38,6 @@ async def create_refresh_token(user: UserModel):
     refresh_token = jwt.encode(refresh_token_payload, SECRET_KEY, algorithm=ALGORITHM)
     await RefreshTokenModel.create(user=user, token=refresh_token)
     return refresh_token
-
 
 async def get_current_user(
     request: Request, token: Optional[str] = Depends(oauth2_scheme)
@@ -82,7 +81,6 @@ async def get_current_user(
             detail="유효하지 않은 토큰입니다.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
 
 def verify_access_token(token: str) -> Optional[dict]:
     try:
