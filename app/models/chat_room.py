@@ -15,6 +15,16 @@ class Queue(str, Enum):
     aram = "aram"
     flex = "flex"
 
+class PositionEnum(str, Enum):
+    TOP = "top"
+    JUNGLE = "jungle"
+    MIDDLE = "mid"
+    BOTTOM = "adc"
+    SUPPORT = "sup"
+    FILL = "FILL"
+
+
+
 
 class PositionEnum(str, Enum):
     TOP = "top"

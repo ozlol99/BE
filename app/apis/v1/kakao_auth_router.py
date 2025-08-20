@@ -39,6 +39,7 @@ async def kakao_auth(code: str, response: Response):
         )
         return response_with_redirection
 
+
     else:
         redirect_response = RedirectResponse(
             url=f"https://{BASE_URL}/add-info",  # https://lol99.kro.kr/add-info
