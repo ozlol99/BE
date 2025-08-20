@@ -15,7 +15,7 @@ router = APIRouter(prefix="", tags=["google-login"])
 settings = Settings()
 BASE_URL = settings.base_url
 
-# https://accounts.google.com/o/oauth2/v2/auth?response_type=code&scope=openid%20email&client_id=281980891262-7nagpvldql6sg5ejlvsecps9gvlsdcqj.apps.googleusercontent.com&redirect_uri=http://localhost:8000/google-login
+# https://accounts.google.com/o/oauth2/v2/auth?response_type=code&scope=openid%20email&client_id=281980891262-7nagpvldql6sg5ejlvsecps9gvlsdcqj.apps.googleusercontent.com&redirect_uri=https://api.lol99.kro.kr:8000
 
 
 @router.get("/google-login", description="Auth-Code")
@@ -40,6 +40,7 @@ async def google_auth(code: str, response: Response):
         response_with_redirection.set_cookie(
             key="refresh_token", value=refresh_token, httponly=True
         )
+        # print(token_info)
         return response_with_redirection
 
     else:

@@ -10,5 +10,5 @@ class ChatRoomCreateDTO(BaseModel):
     max_members: int = Field(..., description="최대 인원수")
     queue_type: Queue = Field(..., description="큐 타입")
     hashtags: Optional[List[str]] = Field(
-        None, max_length=3, description="해시태그 목록 (최대 3개)"
+        None, max_length=3, description="해시 태그 목록 (최대 3개)"
     )
