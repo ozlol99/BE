@@ -13,6 +13,7 @@ settings = Settings()
 BASE_URL = settings.base_url
 MAIN_URL = settings.main_url
 
+
 @router.get("/kakao-login", description="Auth-Code")
 async def kakao_auth(code: str, response: Response):
     token_info = request_kakao_token(code, "/kakao-login")
@@ -39,7 +40,7 @@ async def kakao_auth(code: str, response: Response):
 
     else:
         redirect_response = RedirectResponse(
-            url=f"https://{BASE_URL}/add-info", #https://lol99.kro.kr/add-info
+            url=f"https://{BASE_URL}/add-info",  # https://lol99.kro.kr/add-info
             status_code=status.HTTP_307_TEMPORARY_REDIRECT,
         )
         response_with_session = await set_cookie_by_email(

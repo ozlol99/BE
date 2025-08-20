@@ -18,6 +18,7 @@ MAIN_URL = settings.main_url
 
 # https://accounts.google.com/o/oauth2/v2/auth?response_type=&scope=openid%20email&client_id=281980891262-7nagpvldql6sg5ejlvsecps9gvlsdcqj.apps.googleusercontent.com&redirect_uri=http://localhost:8000/google-login
 
+
 @router.get("/google-login", description="Auth-Code")
 async def google_auth(code: str, response: Response):
     token_info = request_google_token(code, detail_url="/google-login")
