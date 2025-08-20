@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from tortoise import fields, models
 
-from app.models.position import PositionEnum
+from app.models.chat_room import PositionEnum
 
 if TYPE_CHECKING:
     from app.models.chat_room import ChatRoom
@@ -23,7 +23,7 @@ class ChatRoomParticipant(models.Model):
     riot_account: fields.ForeignKeyRelation[RiotAccount] = fields.ForeignKeyField(
         "models.RiotAccount", related_name="room_presences"
     )
-    position = fields.CharEnumField(PositionEnum, max_length=10, description="포지션")
+    position = fields.CharEnumField(PositionEnum ,description="포지션")
     joined_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:

@@ -37,6 +37,7 @@ async def kakao_auth(code: str, response: Response):
         )
         return response_with_redirection
 
+
     else:
         redirect_response = RedirectResponse(
             url=f"{BASE_URL}/user/register",

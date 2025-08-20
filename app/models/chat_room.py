@@ -15,6 +15,16 @@ class Queue(str, Enum):
     aram = "aram"
     flex = "flex"
 
+class PositionEnum(str, Enum):
+    TOP = "top"
+    JUNGLE = "jungle"
+    MIDDLE = "mid"
+    BOTTOM = "adc"
+    SUPPORT = "sup"
+    FILL = "FILL"
+
+
+
 
 class ChatRoom(models.Model):
     id = fields.IntField(pk=True)
@@ -25,7 +35,7 @@ class ChatRoom(models.Model):
     max_members = fields.IntField(description="최대 인원수", default=5)
     created_at = fields.DatetimeField(auto_now_add=True)
     queue_type = fields.CharEnumField(
-        Queue, unique=True, max_length=30, null=True, description="Queue Type"
+        Queue, max_length=30, null=True, description="Queue Type"
     )
     hashtags: fields.ManyToManyRelation[HashTag] = fields.ManyToManyField(
         "models.HashTag", related_name="chat_rooms", through="chatroom_hashtag"
