@@ -52,6 +52,7 @@ async def register_user(
         new_user = await UserModel.create(
             email=email,
             user=user_data.user,  # 닉네임
+            riot_user="user_data.riot_user5", # 이거 고쳐야하는데 흠
             google_or_kakao=google_or_kakao,
             gender=user_data.gender,  # 1 남자 0 여자
             birthday=user_data.birthday,

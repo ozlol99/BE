@@ -1,14 +1,14 @@
 services:
-  lol99: # Project name
+  lol99:
     container_name: lol99
     build:
       context: .
       dockerfile: Dockerfile
-    image: lol99   # 명시적으로 이미지 이름 지정
+    image: lol99
     ports:
       - "8000:8000"
     volumes:
-      - .:/app   # 로컬 소스코드 디렉토리 마운트 (경로는 상황에 맞게 수정)
+      - .:/app
     command: uvicorn asgi:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - mysql_db
