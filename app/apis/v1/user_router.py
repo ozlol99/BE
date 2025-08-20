@@ -16,11 +16,10 @@ from app.services.kakao_login import request_kakao_token
 from app.services.social_auth_session import SessionData, cookie, get_data_from_cookie
 from app.services.social_unlink import unlink_social_account
 from app.services.token_service import (
-    ALGORITHM,
-    SECRET_KEY,
     create_access_token,
     create_refresh_token,
     get_current_user,
+    refresh_access_token,
 )
 from app.services.user_likes import add_like
 
@@ -177,7 +176,6 @@ async def link_riot_account(
             detail="An unexpected error occurred while linking the account.",
         )
 
-
 @router.get("/riot-accounts", response_model=List[RiotAccountResponse])
 async def get_linked_riot_accounts(current_user: UserModel = Depends(get_current_user)):
     """Gets a list of Riot accounts linked to the current user."""
@@ -207,64 +205,8 @@ async def unlink_riot_account(
     summary="액세스 토큰 갱신",
     description="리프레시 토큰을 사용 하여 새로운 액세스 토큰을 발급합니다.",
 )
-async def refresh_access_token(
+async def refresh_access_token_router(
     response: Response, refresh_token: str = Depends(cookie)
 ):
-    if not refresh_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="리프레시 토큰이 제공되지 않았습니다.",
-        )
-
-    try:
-        # 리프레시 토큰 디코딩 및 유효성 검사
-        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = payload.get("sub")
-        if user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="유효하지 않은 리프레시 토큰입니다.",
-            )
-
-        # DB에서 리프레시 토큰 조회
-        db_refresh_token = await RefreshTokenModel.get_or_none(
-            token=refresh_token, user_id=user_id
-        )
-
-        if not db_refresh_token:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="리프레시 토큰을 찾을 수 없습니다.",
-            )
-
-        # 리프레시 토큰이 이미 무효화되었는지 확인
-        if db_refresh_token.revoked:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="무효화된 리프레시 토큰입니다.",
-            )
-
-        # 사용자 조회
-        user = await UserModel.get_or_none(id=user_id)
-        if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="사용자를 찾을 수 없습니다.",
-            )
-
-        # 새로운 액세스 토큰 발급
-        new_access_token = create_access_token(data={"sub": user.email})
-
-        # 새로운 액세스 토큰 반환
-        return {"access_token": new_access_token, "token_type": "bearer"}
-
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="만료된 리프레시 토큰입니다.",
-        )
-    except jwt.InvalidTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="유효하지 않은 리프레시 토큰입니다.",
-        )
+    return_value = await refresh_access_token(refresh_token)
+    return return_value

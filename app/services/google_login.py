@@ -32,11 +32,14 @@ def request_google_token(code: str, detail_url) -> Dict[str, Any]:
 def get_google_profile(access_token: str) -> str:
     user_info_url = "https://www.googleapis.com/oauth2/v3/userinfo"
     headers = {"Authorization": f"Bearer {access_token}"}
-    response = requests.get(user_info_url, headers=headers)
-    if response.status_code != 200:
+    try:
+        response = requests.get(user_info_url, headers=headers)
+        response.raise_for_status()
+        user_info = response.json()
+        print(f"user_info: {user_info}")
+        return user_info["email"]
+    except requests.exceptions.RequestException as e:
+        print(f"API 호출 중 오류 발생: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to fetch user info from Google: {response.json()}",
         )
-    user_info = response.json()
-    return cast(str, user_info["email"])
