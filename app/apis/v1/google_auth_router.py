@@ -40,6 +40,7 @@ async def google_auth(code: str, response: Response):
         response_with_redirection.set_cookie(
             key="refresh_token", value=refresh_token, httponly=True
         )
+        # print(token_info)
         return response_with_redirection
 
     else:

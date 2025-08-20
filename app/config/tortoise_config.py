@@ -22,7 +22,6 @@ TORTOISE_APP_MODELS: list[str] = [
     "app.models.search_summoner",
     "app.models.chat_room",
     "app.models.hash_tag",
-    "app.models.position",
     "app.models.riot_account",
     "app.models.chat_room_participant",
 ]
