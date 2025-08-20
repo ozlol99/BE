@@ -23,7 +23,7 @@ class ChatRoomParticipant(models.Model):
     riot_account: fields.ForeignKeyRelation[RiotAccount] = fields.ForeignKeyField(
         "models.RiotAccount", related_name="room_presences"
     )
-    position = fields.CharEnumField(PositionEnum ,description="포지션")
+    position = fields.CharEnumField(PositionEnum, description="포지션")
     joined_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:

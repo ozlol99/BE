@@ -2,7 +2,7 @@ from typing import Annotated, List, Optional
 
 from pydantic import BaseModel, Field
 
-from app.models.chat_room import Queue, PositionEnum
+from app.models.chat_room import PositionEnum, Queue
 
 Hashtags = Annotated[list[str], Field(max_items=3)]
 

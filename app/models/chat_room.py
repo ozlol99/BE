@@ -15,6 +15,7 @@ class Queue(str, Enum):
     aram = "aram"
     flex = "flex"
 
+
 class PositionEnum(str, Enum):
     TOP = "top"
     JUNGLE = "jungle"
@@ -22,8 +23,6 @@ class PositionEnum(str, Enum):
     BOTTOM = "adc"
     SUPPORT = "sup"
     FILL = "FILL"
-
-
 
 
 class ChatRoom(models.Model):
