@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from tortoise import fields, models
 
-from app.models.chat_room import PositionEnum
+from app.models.position import PositionEnum
 
 if TYPE_CHECKING:
     from app.models.chat_room import ChatRoom
