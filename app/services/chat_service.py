@@ -42,12 +42,20 @@ def _format_time_ago(dt):
 
 
 async def create_chat_room(room_data: ChatRoomCreate, owner: UserModel) -> ChatRoom:
-    chat_room = await ChatRoom.create(
-        name=room_data.name,
-        owner=owner,
-        max_members=room_data.max_members,
-        queue_type=room_data.queue_type,
-    )
+    try:
+        chat_room = await ChatRoom.create(
+            name=room_data.name,
+            owner=owner,
+            max_members=room_data.max_members,
+            queue_type=room_data.queue_type,
+        )
+    except IntegrityError as e:
+        if "Duplicate entry" in str(e) and "queue_type" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Chat room with queue type '{room_data.queue_type}' already exists.",
+            )
+        raise  # Re-raise other IntegrityErrors
 
     if room_data.hashtags:
         for tag_name in room_data.hashtags:
