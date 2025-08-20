@@ -2,7 +2,6 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.responses import JSONResponse
-from jose import jwt
 from pydantic import BaseModel
 from tortoise.exceptions import DoesNotExist, IntegrityError
 
@@ -175,6 +174,7 @@ async def link_riot_account(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while linking the account.",
         )
+
 
 @router.get("/riot-accounts", response_model=List[RiotAccountResponse])
 async def get_linked_riot_accounts(current_user: UserModel = Depends(get_current_user)):

@@ -29,7 +29,7 @@ def request_google_token(code: str, detail_url) -> Dict[str, Any]:
     return cast(Dict[str, Any], response.json())
 
 
-def get_google_profile(access_token: str) -> str:
+def get_google_profile(access_token):
     user_info_url = "https://www.googleapis.com/oauth2/v3/userinfo"
     headers = {"Authorization": f"Bearer {access_token}"}
     try:

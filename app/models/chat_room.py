@@ -15,6 +15,7 @@ class Queue(str, Enum):
     aram = "aram"
     flex = "flex"
 
+
 class PositionEnum(str, Enum):
     TOP = "top"
     JUNGLE = "jungle"
@@ -25,6 +26,7 @@ class PositionEnum(str, Enum):
 
     class META:
         table = "positions"
+
 
 class ChatRoom(models.Model):
     id = fields.IntField(pk=True)

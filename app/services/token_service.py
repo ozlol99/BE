@@ -93,9 +93,8 @@ def verify_access_token(token: str) -> Optional[dict]:
     except jwt.InvalidTokenError:
         return None
 
-async def refresh_access_token(
-    refresh_token: str
-):
+
+async def refresh_access_token(refresh_token: str):
     if not refresh_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

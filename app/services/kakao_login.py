@@ -9,6 +9,7 @@ BASE_URL = settings.base_url
 KAKAO_REST_API_KEY = settings.kakao_rest_api_key
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
 
+
 # 2. 토큰 요청 함수 (인가 코드를 인자로 받음)
 def request_kakao_token(code: str, detail_uri):
     redirect_uri = f"{BASE_URL}{detail_uri}"
@@ -43,4 +44,3 @@ def get_kakao_profile(access_token):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
         )
-

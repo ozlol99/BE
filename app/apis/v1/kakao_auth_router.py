@@ -15,6 +15,7 @@ MAIN_URL = settings.main_url
 
 # https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a04159cc219d093bdcde9d55ea4b88fc&redirect_uri=http://127.0.0.1:8000/kakao-login
 
+
 @router.get("/kakao-login", description="Auth-Code")
 async def kakao_auth(code: str, response: Response):
     token_info = request_kakao_token(code, "/kakao-login")
@@ -38,7 +39,6 @@ async def kakao_auth(code: str, response: Response):
             key="refresh_token", value=refresh_token, httponly=True
         )
         return response_with_redirection
-
 
     else:
         redirect_response = RedirectResponse(

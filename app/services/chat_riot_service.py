@@ -2,7 +2,9 @@ from typing import Any, Dict
 
 import httpx
 from fastapi import HTTPException, status
+
 from app.config.settings import Settings
+
 settings = Settings()
 
 # Re-using the base URL and API key logic from the existing service
