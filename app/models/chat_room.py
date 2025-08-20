@@ -23,17 +23,8 @@ class PositionEnum(str, Enum):
     SUPPORT = "sup"
     FILL = "FILL"
 
-
-
-
-class PositionEnum(str, Enum):
-    TOP = "top"
-    JUNGLE = "jungle"
-    MIDDLE = "mid"
-    BOTTOM = "adc"
-    SUPPORT = "sup"
-    FILL = "FILL"
-
+    class META:
+        table = "positions"
 
 class ChatRoom(models.Model):
     id = fields.IntField(pk=True)
