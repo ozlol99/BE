@@ -16,6 +16,11 @@ class ChatRoomCreate(BaseModel):
     name: str = Field(..., max_length=100)
     max_members: int = Field(..., ge=2, le=5)
     queue_type: Queue
+    use_discord: bool = False
+    mic_required: bool = False
+    listen_only_allowed: bool = False
+    riot_account_id: int
+    position: PositionEnum
     hashtags: Hashtags | None = None
 
 
@@ -40,6 +45,10 @@ class ParticipantResponse(BaseModel):
     position: str
     riot_account: ParticipantRiotAccountResponse
     tier_icon_url: str
+    wins: int
+    losses: int
+    league_points: int
+    likes_received: int
 
 
 class ChatRoomDetailResponse(BaseModel):
@@ -49,6 +58,9 @@ class ChatRoomDetailResponse(BaseModel):
     max_members: int
     current_members: int
     queue_type: str
+    use_discord: bool
+    mic_required: bool
+    listen_only_allowed: bool
     hashtags: List[HashtagResponse]
     participants: List[ParticipantResponse]
 
@@ -59,6 +71,9 @@ class ChatRoomCardResponse(BaseModel):
     current_members: int
     max_members: int
     queue_type: str
+    use_discord: bool
+    mic_required: bool
+    listen_only_allowed: bool
     hashtags: List[HashtagResponse]
     owner_nickname: str
     created_ago: str

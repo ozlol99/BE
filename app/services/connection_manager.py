@@ -2,41 +2,50 @@ import json
 from collections import defaultdict
 from typing import Dict, List
 
-from fastapi import WebSocket
+from fastapi import WebSocket, status
 
 
 class ConnectionManager:
     def __init__(self) -> None:
-        self.active_connections: Dict[str, List[WebSocket]] = defaultdict(list)
+        self.active_connections: Dict[str, Dict[int, WebSocket]] = defaultdict(dict)
         self.history: Dict[str, List[dict]] = defaultdict(list)
 
-    async def connect(self, websocket: WebSocket, room_id: str):
+    async def connect(self, websocket: WebSocket, room_id: str, user_id: int):
         await websocket.accept()
-        self.active_connections[room_id].append(websocket)
+        self.active_connections[room_id][user_id] = websocket
 
         # Send chat history to the newly connected user
         if room_id in self.history:
             for message in self.history[room_id]:
                 await websocket.send_text(json.dumps(message))
 
-    def disconnect(self, websocket: WebSocket, room_id: str):
+    def disconnect(self, room_id: str, user_id: int):
         if (
             room_id in self.active_connections
-            and websocket in self.active_connections[room_id]
+            and user_id in self.active_connections[room_id]
         ):
-            self.active_connections[room_id].remove(websocket)
+            del self.active_connections[room_id][user_id]
             # If the room is empty, clear the connection and history
             if not self.active_connections[room_id]:
                 del self.active_connections[room_id]
                 if room_id in self.history:
                     del self.history[room_id]
 
+    async def disconnect_user(self, room_id: str, user_id: int):
+        if (
+            room_id in self.active_connections
+            and user_id in self.active_connections[room_id]
+        ):
+            websocket = self.active_connections[room_id][user_id]
+            await websocket.close(code=status.WS_1000_NORMAL_CLOSURE)
+            self.disconnect(room_id, user_id)
+
     async def broadcast(self, message: dict, room_id: str):
         # Store message in history before broadcasting
         self.history[room_id].append(message)
 
         if room_id in self.active_connections:
-            for connection in self.active_connections[room_id]:
+            for user_id, connection in self.active_connections[room_id].items():
                 await connection.send_text(json.dumps(message))
 
     def get_active_user_count(self, room_id: str) -> int:
