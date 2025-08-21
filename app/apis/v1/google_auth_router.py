@@ -46,7 +46,7 @@ async def google_auth(code: str, response: Response):
 
     else:
         redirect_response = RedirectResponse(
-            url=f"{BASE_URL}/add-info",
+            url=f"{MAIN_URL}/add-info",
             status_code=status.HTTP_307_TEMPORARY_REDIRECT,
         )
         response_with_session = await set_cookie_by_email(
