@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Response, status
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 
 from app.config.settings import Settings
 from app.models.refresh_token import RefreshTokenModel
@@ -26,19 +26,19 @@ async def kakao_auth(code: str, response: Response):
         await RefreshTokenModel.filter(user=user).delete()
         access_token = create_access_token(data={"sub": user.email})
         refresh_token = await create_refresh_token(user)
-        response_data = {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "redirect_url": f"{MAIN_URL}",
-        }
-        response_with_redirection = JSONResponse(
-            content=response_data,
-            status_code=status.HTTP_200_OK,  # 리디렉션 상태 코드가 아님
+
+        redirect_response = RedirectResponse(
+            url=f"{MAIN_URL}", status_code=status.HTTP_302_FOUND
+        )  # Use 302 Found for redirection
+        redirect_response.headers["Authorization"] = f"Bearer {access_token}"
+        redirect_response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            domain=".lol99.kro.kr",
         )
-        response_with_redirection.set_cookie(
-            key="refresh_token", value=refresh_token, httponly=True
-        )
-        return response_with_redirection
+        return redirect_response
 
     else:
         redirect_response = RedirectResponse(
