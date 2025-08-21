@@ -24,9 +24,6 @@ class PositionEnum(str, Enum):
     SUPPORT = "sup"
     FILL = "FILL"
 
-    class META:
-        table = "positions"
-
 
 class ChatRoom(models.Model):
     id = fields.IntField(pk=True)

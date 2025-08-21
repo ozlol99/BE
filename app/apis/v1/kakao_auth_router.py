@@ -49,3 +49,4 @@ async def kakao_auth(code: str, response: Response):
             email, "kakao", redirect_response
         )
         return response_with_session
+

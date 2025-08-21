@@ -61,7 +61,9 @@ CREATE TABLE IF NOT EXISTS `chat_rooms` (
     `name` VARCHAR(100) NOT NULL COMMENT '채팅방 이름',
     `max_members` INT NOT NULL COMMENT '최대 인원수' DEFAULT 5,
     `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+
     `queue_type` VARCHAR(30) UNIQUE COMMENT 'Queue Type',
+
     `owner_id` INT NOT NULL COMMENT '방장',
     CONSTRAINT `fk_chat_roo_user_42dc1056` FOREIGN KEY (`owner_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) CHARACTER SET utf8mb4;
@@ -73,6 +75,7 @@ CREATE TABLE IF NOT EXISTS `positions` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `name` VARCHAR(10) NOT NULL UNIQUE COMMENT '포지션 이름 (e.g., TOP, JGL)'
 ) CHARACTER SET utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `riot_accounts` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `game_name` VARCHAR(50) NOT NULL COMMENT '라이엇 게임 이름',
@@ -84,14 +87,18 @@ CREATE TABLE IF NOT EXISTS `riot_accounts` (
 ) CHARACTER SET utf8mb4;
 CREATE TABLE IF NOT EXISTS `chatroom_participants` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+
     `joined_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     `position_id` INT NOT NULL,
+
     `riot_account_id` INT NOT NULL,
     `room_id` INT NOT NULL,
     `user_id` INT NOT NULL,
     UNIQUE KEY `uid_chatroom_pa_room_id_8bbe77` (`room_id`, `user_id`),
+
     UNIQUE KEY `uid_chatroom_pa_room_id_306cb3` (`room_id`, `position_id`),
     CONSTRAINT `fk_chatroom_position_878368bc` FOREIGN KEY (`position_id`) REFERENCES `positions` (`id`) ON DELETE CASCADE,
+
     CONSTRAINT `fk_chatroom_riot_acc_84700c3c` FOREIGN KEY (`riot_account_id`) REFERENCES `riot_accounts` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_chatroom_chat_roo_4d97fd1f` FOREIGN KEY (`room_id`) REFERENCES `chat_rooms` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_chatroom_user_00c48193` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
