@@ -36,6 +36,9 @@ class ChatRoom(models.Model):
     queue_type = fields.CharEnumField(
         Queue, max_length=30, null=True, description="Queue Type"
     )
+    use_discord = fields.BooleanField(default=False, description="디스코드 사용 가능 여부")
+    mic_required = fields.BooleanField(default=False, description="마이크 필수 여부")
+    listen_only_allowed = fields.BooleanField(default=False, description="듣기만 가능 여부")
     hashtags: fields.ManyToManyRelation[HashTag] = fields.ManyToManyField(
         "models.HashTag", related_name="chat_rooms", through="chatroom_hashtag"
     )

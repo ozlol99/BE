@@ -19,8 +19,10 @@ from app.models.chat_room import ChatRoom
 from app.models.chat_room_participant import ChatRoomParticipant
 from app.models.hash_tag import HashTag
 from app.models.riot_account import RiotAccount
-from app.models.user import UserModel
-from app.services import chat_riot_service, summoner_search_service
+from app.models.user import UserLikeModel, UserModel
+from app.services import summoner_search_service
+from app.services.chat_riot_service import get_tier_icon_url
+from app.services.connection_manager import manager
 
 
 # Helper function for time
@@ -42,20 +44,45 @@ def _format_time_ago(dt):
 
 
 async def create_chat_room(room_data: ChatRoomCreate, owner: UserModel) -> ChatRoom:
+    # Verify the owner has the riot account
+    try:
+        riot_account = await RiotAccount.get(id=room_data.riot_account_id, user=owner)
+    except DoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Riot account not found for the owner.",
+        )
+
     try:
         chat_room = await ChatRoom.create(
             name=room_data.name,
             owner=owner,
             max_members=room_data.max_members,
             queue_type=room_data.queue_type,
+            use_discord=room_data.use_discord,
+            mic_required=room_data.mic_required,
+            listen_only_allowed=room_data.listen_only_allowed,
         )
+
+        # Automatically add the owner as a participant
+        await ChatRoomParticipant.create(
+            user=owner,
+            room=chat_room,
+            riot_account=riot_account,
+            position=room_data.position,
+        )
+
     except IntegrityError as e:
+        # This might catch unique constraint violations for the chat room or participant
         if "Duplicate entry" in str(e) and "queue_type" in str(e):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Chat room with queue type '{room_data.queue_type}' already exists.",
             )
-        raise  # Re-raise other IntegrityErrors
+        # Handle case where owner might already be in a room with that position if logic allows
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=f"Creation failed: {e}"
+        )
 
     if room_data.hashtags:
         for tag_name in room_data.hashtags:
@@ -83,6 +110,9 @@ async def get_chat_room_list() -> List[ChatRoomCardResponse]:
                 current_members=room_with_members.current_members,
                 max_members=room_with_members.max_members,
                 queue_type=room_with_members.queue_type.value,
+                use_discord=room_with_members.use_discord,
+                mic_required=room_with_members.mic_required,
+                listen_only_allowed=room_with_members.listen_only_allowed,
                 hashtags=[
                     HashtagResponse(id=tag.id, name=tag.name)
                     for tag in room_with_members.hashtags
@@ -106,11 +136,14 @@ async def get_chat_room_details(room_id: int) -> ChatRoomDetailResponse:
             summoner_info = await summoner_search_service.get_summoner_info(
                 p.riot_account.game_name, p.riot_account.tag_line
             )
-            rank_info = await chat_riot_service.get_summoner_rank_info(
+            rank_info = await summoner_search_service.get_rank_info(
                 summoner_info["puuid"]
             )
-            tier = rank_info.get("solo_rank", {}).get("tier", "UNRANKED")
-            tier_icon = chat_riot_service.get_tier_icon_url(tier)
+            solo_rank_info = rank_info.get("solo_rank", {})
+            tier = solo_rank_info.get("tier", "UNRANKED")
+            tier_icon = get_tier_icon_url(tier)
+
+            likes_received = await UserLikeModel.filter(to_user_id=p.user.id).count()
 
             participant_responses.append(
                 ParticipantResponse(
@@ -122,6 +155,10 @@ async def get_chat_room_details(room_id: int) -> ChatRoomDetailResponse:
                         tag_line=p.riot_account.tag_line,
                     ),
                     tier_icon_url=tier_icon,
+                    wins=solo_rank_info.get("wins", 0),
+                    losses=solo_rank_info.get("losses", 0),
+                    league_points=solo_rank_info.get("league_points", 0),
+                    likes_received=likes_received,
                 )
             )
 
@@ -132,6 +169,9 @@ async def get_chat_room_details(room_id: int) -> ChatRoomDetailResponse:
             max_members=room.max_members,
             current_members=len(participants),
             queue_type=room.queue_type.value,
+            use_discord=room.use_discord,
+            mic_required=room.mic_required,
+            listen_only_allowed=room.listen_only_allowed,
             hashtags=[
                 HashtagResponse(id=tag.id, name=tag.name) for tag in room.hashtags
             ],
@@ -218,4 +258,28 @@ async def leave_chat_room(room_id: int, user: UserModel):
     except DoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="You are not in this room."
+        )
+
+
+async def kick_participant(room_id: int, participant_id: int, owner: UserModel):
+    try:
+        room = await ChatRoom.get(id=room_id, owner=owner)
+        participant_to_kick = await ChatRoomParticipant.get(
+            id=participant_id, room=room
+        ).prefetch_related("user")
+
+        if participant_to_kick.user.id == owner.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Owner cannot kick themselves.",
+            )
+
+        user_id_to_kick = participant_to_kick.user.id
+        await participant_to_kick.delete()
+        await manager.disconnect_user(str(room_id), user_id_to_kick)
+
+    except DoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Participant not found in this room or you are not the owner.",
         )

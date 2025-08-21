@@ -87,6 +87,19 @@ async def leave_room(room_id: int, current_user: UserModel = Depends(get_current
     return {"detail": "Successfully left the room."}
 
 
+@router.delete(
+    "/rooms/{room_id}/participants/{participant_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def kick_participant_from_room(
+    room_id: int,
+    participant_id: int,
+    current_user: UserModel = Depends(get_current_user),
+):
+    await chat_service.kick_participant(room_id, participant_id, current_user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 # WebSocket Endpoint
 
 
@@ -126,11 +139,12 @@ async def websocket_endpoint(websocket: WebSocket, room_id: int):
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
 
-    await manager.connect(websocket, str(room_id))
+    user_id = participant.user.id
+    await manager.connect(websocket, str(room_id), user_id)
 
     join_message = {
         "type": "user_join",
-        "user_id": participant.user.id,
+        "user_id": user_id,
         "username": participant.riot_account.game_name,
         "timestamp": time.time(),
     }
@@ -141,17 +155,17 @@ async def websocket_endpoint(websocket: WebSocket, room_id: int):
             data = await websocket.receive_text()
             message = {
                 "type": "chat_message",
-                "sender_id": participant.user.id,
+                "sender_id": user_id,
                 "username": participant.riot_account.game_name,
                 "content": data,
                 "timestamp": time.time(),
             }
             await manager.broadcast(message, str(room_id))
     except WebSocketDisconnect:
-        manager.disconnect(websocket, str(room_id))
+        manager.disconnect(str(room_id), user_id)
         leave_message = {
             "type": "user_leave",
-            "user_id": participant.user.id,
+            "user_id": user_id,
             "username": participant.riot_account.game_name,
             "timestamp": time.time(),
         }
