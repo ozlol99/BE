@@ -20,7 +20,10 @@ class ConnectionManager:
                 await websocket.send_text(json.dumps(message))
 
     def disconnect(self, room_id: str, user_id: int):
-        if room_id in self.active_connections and user_id in self.active_connections[room_id]:
+        if (
+            room_id in self.active_connections
+            and user_id in self.active_connections[room_id]
+        ):
             del self.active_connections[room_id][user_id]
             # If the room is empty, clear the connection and history
             if not self.active_connections[room_id]:
@@ -29,7 +32,10 @@ class ConnectionManager:
                     del self.history[room_id]
 
     async def disconnect_user(self, room_id: str, user_id: int):
-        if room_id in self.active_connections and user_id in self.active_connections[room_id]:
+        if (
+            room_id in self.active_connections
+            and user_id in self.active_connections[room_id]
+        ):
             websocket = self.active_connections[room_id][user_id]
             await websocket.close(code=status.WS_1000_NORMAL_CLOSURE)
             self.disconnect(room_id, user_id)

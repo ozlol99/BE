@@ -71,14 +71,18 @@ async def delete_room(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.post("/rooms/{room_id}/join", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/rooms/{room_id}/join",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ChatRoomDetailResponse,
+)
 async def join_room(
     room_id: int,
     join_data: JoinRoomRequest,
     current_user: UserModel = Depends(get_current_user),
 ):
     await chat_service.join_chat_room(room_id, join_data, current_user)
-    return {"detail": "Successfully joined the room."}
+    return await chat_service.get_chat_room_details(room_id)
 
 
 @router.post("/rooms/{room_id}/leave", status_code=status.HTTP_200_OK)

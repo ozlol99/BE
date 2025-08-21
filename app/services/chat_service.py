@@ -210,7 +210,19 @@ async def update_chat_room(
 async def delete_chat_room(room_id: int, user: UserModel):
     try:
         room = await ChatRoom.get(id=room_id, owner=user)
-        await room.delete()
+
+        # Find all participants before deleting the room
+        participants = await ChatRoomParticipant.filter(
+            room_id=room.id
+        ).prefetch_related("user")
+
+        # Disconnect all participants from the WebSocket
+        for p in participants:
+            await manager.disconnect_user(str(room_id), p.user.id)
+
+        # Now, delete the room from the database
+        await room.delete()  # This will also cascade-delete participants
+
     except DoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -253,8 +265,26 @@ async def leave_chat_room(room_id: int, user: UserModel):
                 detail="Owner cannot leave the room, must delete it instead.",
             )
 
-        participant = await ChatRoomParticipant.get(room_id=room_id, user=user)
+        participant = await ChatRoomParticipant.get(
+            room_id=room_id, user=user
+        ).prefetch_related("user", "riot_account")
+
+        user_id_to_leave = participant.user.id
+        username_to_leave = participant.riot_account.game_name
+
+        # Delete participant from DB and close their WebSocket
         await participant.delete()
+        await manager.disconnect_user(str(room_id), user_id_to_leave)
+
+        # Broadcast a leave message to the room
+        leave_message = {
+            "type": "user_leave",
+            "user_id": user_id_to_leave,
+            "username": username_to_leave,
+            "timestamp": time.time(),
+        }
+        await manager.broadcast(leave_message, str(room_id))
+
     except DoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="You are not in this room."
@@ -266,7 +296,7 @@ async def kick_participant(room_id: int, participant_id: int, owner: UserModel):
         room = await ChatRoom.get(id=room_id, owner=owner)
         participant_to_kick = await ChatRoomParticipant.get(
             id=participant_id, room=room
-        ).prefetch_related("user")
+        ).prefetch_related("user", "riot_account")
 
         if participant_to_kick.user.id == owner.id:
             raise HTTPException(
@@ -275,8 +305,20 @@ async def kick_participant(room_id: int, participant_id: int, owner: UserModel):
             )
 
         user_id_to_kick = participant_to_kick.user.id
+        username_to_kick = participant_to_kick.riot_account.game_name
+
+        # Delete participant from DB and close their WebSocket
         await participant_to_kick.delete()
         await manager.disconnect_user(str(room_id), user_id_to_kick)
+
+        # Broadcast a leave message to the room
+        leave_message = {
+            "type": "user_leave",
+            "user_id": user_id_to_kick,
+            "username": username_to_kick,
+            "timestamp": time.time(),
+        }
+        await manager.broadcast(leave_message, str(room_id))
 
     except DoesNotExist:
         raise HTTPException(
