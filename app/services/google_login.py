@@ -8,7 +8,7 @@ from app.config.settings import Settings
 settings = Settings()
 GOOGLE_CLIENT_ID = settings.google_client_id
 GOOGLE_CLIENT_SECRET = settings.google_client_secret
-GOOGLE_REDIRECT_URI = settings.google_redirect_uri
+GOOGLE_REDIRECT_URI = settings.base_url
 
 
 def request_google_token(code: str, detail_url) -> Dict[str, Any]:
@@ -29,14 +29,17 @@ def request_google_token(code: str, detail_url) -> Dict[str, Any]:
     return cast(Dict[str, Any], response.json())
 
 
-def get_google_profile(access_token: str) -> str:
+def get_google_profile(access_token):
     user_info_url = "https://www.googleapis.com/oauth2/v3/userinfo"
     headers = {"Authorization": f"Bearer {access_token}"}
-    response = requests.get(user_info_url, headers=headers)
-    if response.status_code != 200:
+    try:
+        response = requests.get(user_info_url, headers=headers)
+        response.raise_for_status()
+        user_info = response.json()
+        print(f"user_info: {user_info}")
+        return user_info["email"]
+    except requests.exceptions.RequestException as e:
+        print(f"API 호출 중 오류 발생: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to fetch user info from Google: {response.json()}",
         )
-    user_info = response.json()
-    return cast(str, user_info["email"])

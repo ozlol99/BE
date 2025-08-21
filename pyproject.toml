@@ -45,7 +45,6 @@ tortoise_orm = "app.config.tortoise_config.TORTOISE_ORM"
 location = "./migrations"
 src_folder = "./."
 
-
 [tool.ruff]
 line-length = 100
 fix = true

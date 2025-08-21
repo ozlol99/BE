@@ -92,3 +92,64 @@ def verify_access_token(token: str) -> Optional[dict]:
         return None
     except jwt.InvalidTokenError:
         return None
+
+
+async def refresh_access_token(refresh_token: str):
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="리프레시 토큰이 제공되지 않았습니다.",
+        )
+
+    try:
+        # 리프레시 토큰 디코딩 및 유효성 검사
+        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="유효하지 않은 리프레시 토큰입니다.",
+            )
+
+        # DB에서 리프레시 토큰 조회
+        db_refresh_token = await RefreshTokenModel.get_or_none(
+            token=refresh_token, user_id=user_id
+        )
+
+        if not db_refresh_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="리프레시 토큰을 찾을 수 없습니다.",
+            )
+
+        # 리프레시 토큰이 이미 무효화되었는지 확인
+        if db_refresh_token.revoked:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="무효화된 리프레시 토큰입니다.",
+            )
+
+        # 사용자 조회
+        user = await UserModel.get_or_none(id=user_id)
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="사용자를 찾을 수 없습니다.",
+            )
+
+        # 새로운 액세스 토큰 발급
+        new_access_token = create_access_token(data={"sub": user.email})
+
+        # 새로운 액세스 토큰 반환
+        return {"access_token": new_access_token, "token_type": "bearer"}
+
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="만료된 리프레시 토큰입니다.",
+        )
+    except jwt.InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="유효하지 않은 리프레시 토큰입니다.",
+        )

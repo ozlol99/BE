@@ -1,12 +1,16 @@
-import os
 from typing import Any, Dict
 
 import httpx
 from fastapi import HTTPException, status
 
+from app.config.settings import Settings
+
+settings = Settings()
+
 # Re-using the base URL and API key logic from the existing service
 KR_BASE_URL = "https://kr.api.riotgames.com"
-RIOT_API_KEY = os.getenv("RIOT_API_KEY")
+RIOT_API_KEY = settings.riot_api_key
+
 
 
 async def get_summoner_rank_info(puuid: str) -> Dict[str, Any]:

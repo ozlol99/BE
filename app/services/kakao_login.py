@@ -1,5 +1,5 @@
 import requests
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 
 from app.config.settings import Settings
 
@@ -31,15 +31,16 @@ def request_kakao_token(code: str, detail_uri):
 
 
 def get_kakao_profile(access_token):
-    url = "https://kapi.kakao.com/v2/user/me"
+    user_info_url = "https://kapi.kakao.com/v2/user/me"
     headers = {"Authorization": f"Bearer {access_token}"}
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(user_info_url, headers=headers)
         response.raise_for_status()  # HTTP 오류 발생 시 예외 발생
         user_info = response.json()
         print(f"email: {user_info}")
         return user_info["kakao_account"]["email"]
-
     except requests.exceptions.RequestException as e:
         print(f"API 호출 중 오류 발생: {e}")
-        return None
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )

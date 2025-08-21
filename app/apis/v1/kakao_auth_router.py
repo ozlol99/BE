@@ -11,6 +11,9 @@ from app.services.token_service import create_access_token, create_refresh_token
 router = APIRouter(prefix="", tags=["kakao-user"])
 settings = Settings()
 BASE_URL = settings.base_url
+MAIN_URL = settings.main_url
+
+# https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a04159cc219d093bdcde9d55ea4b88fc&redirect_uri=http://127.0.0.1:8000/kakao-login
 
 
 @router.get("/kakao-login", description="Auth-Code")
@@ -26,7 +29,7 @@ async def kakao_auth(code: str, response: Response):
         response_data = {
             "access_token": access_token,
             "token_type": "bearer",
-            "redirect_url": f"{BASE_URL}/user/{user.id}",
+            "redirect_url": f"{MAIN_URL}",
         }
         response_with_redirection = JSONResponse(
             content=response_data,
@@ -39,7 +42,7 @@ async def kakao_auth(code: str, response: Response):
 
     else:
         redirect_response = RedirectResponse(
-            url=f"{BASE_URL}/user/register",
+            url=f"https://{MAIN_URL}/add-info",  # https://lol99.kro.kr/add-info
             status_code=status.HTTP_307_TEMPORARY_REDIRECT,
         )
         response_with_session = await set_cookie_by_email(
@@ -47,5 +50,3 @@ async def kakao_auth(code: str, response: Response):
         )
         return response_with_session
 
-
-# https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a04159cc219d093bdcde9d55ea4b88fc&redirect_uri=http://localhost:8000/kakao-login
