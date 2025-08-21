@@ -2,7 +2,6 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.responses import JSONResponse
-
 from pydantic import BaseModel
 from tortoise.exceptions import DoesNotExist, IntegrityError
 
@@ -16,8 +15,6 @@ from app.services.kakao_login import request_kakao_token
 from app.services.social_auth_session import SessionData, cookie, get_data_from_cookie
 from app.services.social_unlink import unlink_social_account
 from app.services.token_service import (
-    ALGORITHM,
-    SECRET_KEY,
     create_access_token,
     create_refresh_token,
     get_current_user,
