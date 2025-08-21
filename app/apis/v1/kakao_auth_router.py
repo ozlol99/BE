@@ -42,7 +42,7 @@ async def kakao_auth(code: str, response: Response):
 
     else:
         redirect_response = RedirectResponse(
-            url=f"https://{MAIN_URL}/add-info",  # https://lol99.kro.kr/add-info
+            url=f"{MAIN_URL}/add-info",  # https://lol99.kro.kr/add-info
             status_code=status.HTTP_307_TEMPORARY_REDIRECT,
         )
         response_with_session = await set_cookie_by_email(
