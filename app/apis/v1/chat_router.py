@@ -6,6 +6,7 @@ from typing import List, Optional
 from fastapi import (
     APIRouter,
     Depends,
+    Query,
     Response,
     WebSocket,
     WebSocketDisconnect,
@@ -138,7 +139,7 @@ async def get_participant_from_token(
 
 @router.websocket("/ws/{room_id}")
 async def websocket_endpoint(
-    websocket: WebSocket, room_id: int, token: Optional[str] = None
+    websocket: WebSocket, room_id: int, token: Optional[str] = Query(None)
 ):
     if not token:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
