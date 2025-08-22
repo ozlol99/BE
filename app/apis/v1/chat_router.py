@@ -103,7 +103,9 @@ async def kick_participant_from_room(
     await chat_service.kick_participant(room_id, participant_id, current_user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+
 # WebSocket Endpoint
+
 
 async def get_participant_from_token(
     token: str, room_id: int
