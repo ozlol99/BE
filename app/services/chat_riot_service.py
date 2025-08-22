@@ -12,7 +12,6 @@ KR_BASE_URL = "https://kr.api.riotgames.com"
 RIOT_API_KEY = settings.riot_api_key
 
 
-
 async def get_summoner_rank_info(puuid: str) -> Dict[str, Any]:
     """
     Fetches summoner's rank information (solo and flex) by their PUUID.

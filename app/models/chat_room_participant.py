@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from app.models.riot_account import RiotAccount
     from app.models.user import UserModel
 
+
 class ChatRoomParticipant(models.Model):
     id = fields.IntField(pk=True)
     user: fields.ForeignKeyRelation[UserModel] = fields.ForeignKeyField(
