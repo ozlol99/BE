@@ -43,7 +43,6 @@ async def create_refresh_token(user: UserModel):
 async def get_current_user(
     request: Request, access_token_from_header: Optional[str] = Depends(oauth2_scheme)
 ) -> UserModel:
-
     access_token_from_cookie = request.cookies.get("access_token")
     token_to_verify = (
         access_token_from_cookie

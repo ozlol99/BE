@@ -12,9 +12,6 @@ from fastapi import (
     status,
 )
 
-log = logging.getLogger(__name__)
-
-# DTO Import
 from app.dtos.chat_dto import (
     ChatRoomCardResponse,
     ChatRoomCreate,
@@ -32,9 +29,9 @@ from app.services import chat_service
 from app.services.connection_manager import manager
 from app.services.token_service import get_current_user, verify_access_token
 
-router = APIRouter(prefix="/chat", tags=["Chat"])
+log = logging.getLogger(__name__)
 
-# CRUD Endpoints
+router = APIRouter(prefix="/chat", tags=["Chat"])
 
 
 @router.post(
