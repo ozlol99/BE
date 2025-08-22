@@ -26,17 +26,17 @@ async def kakao_auth(code: str, response: Response):
         await RefreshTokenModel.filter(user=user).delete()
         access_token = create_access_token(data={"sub": user.email})
         refresh_token = await create_refresh_token(user)
-        # Create a RedirectResponse
+
         redirect_response = RedirectResponse(
             url=f"{MAIN_URL}", status_code=status.HTTP_302_FOUND
         )  # Use 302 Found for redirection
-
-        # Set access token in Authorization header
         redirect_response.headers["Authorization"] = f"Bearer {access_token}"
-
-        # Set refresh token as an httponly cookie
         redirect_response.set_cookie(
-            key="refresh_token", value=refresh_token, httponly=True
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            domain=".lol99.kro.kr",
         )
         return redirect_response
 
