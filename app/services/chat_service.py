@@ -23,28 +23,11 @@ from app.models.user import UserLikeModel, UserModel
 from app.services import summoner_search_service
 from app.services.chat_riot_service import get_tier_icon_url
 from app.services.connection_manager import manager
+from app.utils.timestamp import format_time_ago_v2
 
-
-# Helper function for time
-def _format_time_ago(dt):
-    if dt is None:
-        return "N/A"
-    now = time.time()
-    created_at_ts = dt.timestamp()
-    diff = int(now - created_at_ts)
-
-    if diff < 60:
-        return f"{diff}초 전"
-    elif diff < 3600:
-        return f"{diff // 60}분 전"
-    elif diff < 86400:
-        return f"{diff // 3600}시간 전"
-    else:
-        return f"{diff // 86400}일 전"
 
 
 async def create_chat_room(room_data: ChatRoomCreate, owner: UserModel) -> ChatRoom:
-    # Verify the owner has the riot account
     try:
         riot_account = await RiotAccount.get(id=room_data.riot_account_id, user=owner)
     except DoesNotExist:
@@ -118,7 +101,7 @@ async def get_chat_room_list() -> List[ChatRoomCardResponse]:
                     for tag in room_with_members.hashtags
                 ],
                 owner_nickname=room_with_members.owner.user,
-                created_ago=_format_time_ago(room_with_members.created_at),
+                created_ago=format_time_ago_v2(room_with_members.created_at),
             )
         )
     return response

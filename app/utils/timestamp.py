@@ -1,16 +1,8 @@
+import time
 from datetime import datetime, timedelta
 
 
-def format_time_ago(timestamp_ms: int) -> str:
-    """
-    주어진 유닉스 타임스탬프(밀리초)를 현재 시간과 비교하여 "방금 전", "N분 전" 등으로 표현합니다.
-
-    Args:
-        timestamp_ms (int): 비교할 시간의 유닉스 타임스탬프 (밀리초).
-
-    Returns:
-        str: 현재 시간과 비교하여 포맷된 문자열.
-    """
+def format_time_ago_v1(timestamp_ms: int) -> str:
     # 1. 밀리초 타임스탬프를 datetime 객체로 변환
     timestamp_s = timestamp_ms / 1000
     target_time = datetime.fromtimestamp(timestamp_s)
@@ -39,3 +31,21 @@ def format_time_ago(timestamp_ms: int) -> str:
     else:
         years = int(time_diff.days / 365)
         return f"{years}년 전"
+
+
+# Helper function for time
+def format_time_ago_v2(dt):
+    if dt is None:
+        return "N/A"
+    now = time.time()
+    created_at_ts = dt.timestamp()
+    diff = int(now - created_at_ts)
+
+    if diff < 60:
+        return f"{diff}초 전"
+    elif diff < 3600:
+        return f"{diff // 60}분 전"
+    elif diff < 86400:
+        return f"{diff // 3600}시간 전"
+    else:
+        return f"{diff // 86400}일 전"

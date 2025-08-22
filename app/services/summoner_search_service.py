@@ -8,7 +8,7 @@ from tortoise.exceptions import DoesNotExist
 
 from app.config.settings import Settings
 from app.models.search_summoner import RtSearchModel
-from app.utils.timestamp import format_time_ago
+from app.utils.timestamp import format_time_ago_v1
 
 if TYPE_CHECKING:
     pass
@@ -152,7 +152,7 @@ def get_match_info(match_id: str, puuid: str) -> Dict[str, Any]:
         "summoner_name": participant.get("riotIdGameName"),  # 추가
         "rank_type": QUEUE_TYPE_MAP.get(info.get("queueId"), "알 수 없는 랭크"),
         "win": participant.get("win"),  # 👈 승패 정보 추가
-        "game_end_timestamp": str(format_time_ago(info.get("gameEndTimestamp"))),
+        "game_end_timestamp": str(format_time_ago_v1(info.get("gameEndTimestamp"))),
         "play_duration": str(int(info.get("gameDuration") / 60)) + "분",
         "kda": {
             "kills": kills,
