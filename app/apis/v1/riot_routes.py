@@ -19,7 +19,6 @@ async def rtSearch(
     summoner_name: Optional[str] = Query("", description="검색할 소환사명 일부"),
     tag_line: Optional[str] = Query("", description="검색할 태그라인"),
 ):
-
     filtering1 = RtSearchModel.filter(summoner_name__icontains=summoner_name)
     filtering2 = filtering1.filter(tag_line__icontains=tag_line)
     users = await filtering2
@@ -35,7 +34,6 @@ async def search_summoner(
     count_start: int = 0,  # 👈 쿼리 파라미터로 start를 받음
     match_count: int = 20,  # 👈 쿼리 파라미터로 count를 받음
 ):
-
     summoner_info = await get_summoner_info(summoner_name, tag_line)
     rank_info = await get_rank_info(summoner_info["puuid"])
     highest_rank = await update_highest_rank(

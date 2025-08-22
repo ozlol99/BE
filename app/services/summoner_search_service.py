@@ -121,7 +121,6 @@ QUEUE_TYPE_MAP = {
 
 
 def get_match_info(match_id: str, puuid: str) -> Dict[str, Any]:
-
     if not RIOT_API_KEY:
         raise ValueError("RIOT_API_KEY 환경 변수가 설정되지 않았습니다.")
     url = f"{ASIA_BASE_URL}/lol/match/v5/matches/{match_id}?api_key={RIOT_API_KEY}"
@@ -188,7 +187,6 @@ async def get_recent_matches(
     count_start,
     match_count,
 ) -> tuple[Dict[str, Any], List[Dict[str, Any]]]:
-
     if queue_id:
         matchlist_url = (
             f"{ASIA_BASE_URL}/lol/match/v5/matches/by-puuid/{puuid}/"
@@ -296,7 +294,6 @@ def get_rank_value(tier, rank):
 
 
 async def update_highest_rank(current_rank_info, puuid, summoner_name, tag_line):
-
     solo_rank_data = current_rank_info.get("solo_rank", {})
     flex_rank_data = current_rank_info.get("flex_rank", {})
     current_solo_tier = solo_rank_data.get("tier", "UNRANKED")
