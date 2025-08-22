@@ -1,4 +1,6 @@
+import logging
 import time
+import traceback
 from typing import List, Optional
 
 from fastapi import (
@@ -9,6 +11,8 @@ from fastapi import (
     WebSocketDisconnect,
     status,
 )
+
+log = logging.getLogger(__name__)
 
 # DTO Import
 from app.dtos.chat_dto import (
@@ -110,20 +114,28 @@ async def kick_participant_from_room(
 async def get_participant_from_token(
     token: str, room_id: int
 ) -> Optional[ChatRoomParticipant]:
+    log.info(f"[DEBUG] get_participant_from_token called for room {room_id}")
     try:
         payload = verify_access_token(token)
         if not payload or "sub" not in payload:
+            log.warning("[DEBUG] Invalid payload or missing 'sub'")
             return None
+        log.info(f"[DEBUG] Payload 'sub': {payload['sub']}")
 
         user = await UserModel.get_or_none(email=payload["sub"])
         if not user:
+            log.warning(f"[DEBUG] User not found for email: {payload['sub']}")
             return None
+        log.info(f"[DEBUG] User found: {user.id}")
 
         participant = await ChatRoomParticipant.get(
             room_id=room_id, user=user
         ).prefetch_related("riot_account", "user")
+        log.info(f"[DEBUG] Participant found for user {user.id} in room {room_id}")
         return participant
-    except Exception:
+    except Exception as e:
+        log.error(f"[DEBUG] An exception occurred in get_participant_from_token: {e}")
+        log.error(traceback.format_exc())
         return None
 
 
