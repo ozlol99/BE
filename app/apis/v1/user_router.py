@@ -5,7 +5,12 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from tortoise.exceptions import DoesNotExist, IntegrityError
 
-from app.dtos.user_dto import UserDTO, UserUpdate
+from app.dtos.user_dto import (
+    RiotAccountResponse,
+    UserDTO,
+    UserMeResponse,
+    UserUpdate,
+)
 from app.models.refresh_token import RefreshTokenModel
 from app.models.riot_account import RiotAccount
 from app.models.user import UserModel
@@ -29,15 +34,6 @@ router = APIRouter(prefix="/user", tags=["user"])
 class RiotAccountCreate(BaseModel):
     game_name: str
     tag_line: str
-
-
-class RiotAccountResponse(BaseModel):
-    id: int
-    game_name: str
-    tag_line: str
-
-    class Config:
-        from_attributes = True
 
 
 @router.post("/register", description="register")
@@ -68,14 +64,18 @@ async def register_user(
         raise HTTPException(status_code=400, detail="Wrong Request")
 
 
-@router.get("/me")
+@router.get("/me", response_model=UserMeResponse)
 async def get_my_info(current_user: UserModel = Depends(get_current_user)):
-    return {
-        "id": current_user.id,
-        "email": current_user.email,
-        "user": current_user.user,
-        "google_or_kakao": current_user.google_or_kakao,
-    }
+    riot_accounts = await current_user.riot_accounts
+    return UserMeResponse(
+        id=current_user.id,
+        email=current_user.email,
+        user=current_user.user,
+        google_or_kakao=current_user.google_or_kakao,
+        riot_accounts=[
+            RiotAccountResponse.model_validate(acc) for acc in riot_accounts
+        ],
+    )
 
 
 @router.patch("/me")
@@ -179,7 +179,7 @@ async def link_riot_account(
 async def get_linked_riot_accounts(current_user: UserModel = Depends(get_current_user)):
     """Gets a list of Riot accounts linked to the current user."""
     accounts = await RiotAccount.filter(user=current_user)
-    return [RiotAccountResponse.from_orm(acc) for acc in accounts]
+    return [RiotAccountResponse.model_validate(acc) for acc in accounts]
 
 
 @router.delete("/riot-accounts/{account_id}", status_code=status.HTTP_204_NO_CONTENT)
