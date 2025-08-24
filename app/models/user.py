@@ -1,6 +1,12 @@
+from __future__ import annotations
+
 from enum import Enum
+from typing import TYPE_CHECKING
 
 from tortoise import fields, models
+
+if TYPE_CHECKING:
+    from app.models.riot_account import RiotAccount
 
 
 class Social(str, Enum):
@@ -22,6 +28,8 @@ class UserModel(models.Model):
     )
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
+
+    riot_accounts: fields.ReverseRelation[RiotAccount]
 
     class Meta:
         table = "user"
