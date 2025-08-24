@@ -46,8 +46,6 @@ async def google_auth(code: str, response: Response):
             secure=True,
             domain=".lol99.kro.kr",
         )
-
-        # print(token_info)
         return redirect_response
 
     else:
