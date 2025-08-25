@@ -36,3 +36,5 @@ class UserMeResponse(BaseModel):
     user: str
     google_or_kakao: str
     riot_accounts: List[RiotAccountResponse]
+    gender: Optional[bool] = Field(None, description="성별 (true: 남성, false: 여성)")
+    birthday: Optional[datetime] = Field(None, description="생년월일")
