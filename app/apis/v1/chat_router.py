@@ -141,6 +141,12 @@ async def get_participant_from_token(
 async def websocket_endpoint(
     websocket: WebSocket, room_id: int, token: Optional[str] = Query(None)
 ):
+
+    # 쿠키 우선 시도
+    cookie_token = websocket.cookies.get("access_token")
+    if not token and cookie_token:
+        token = cookie_token
+
     if not token:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
