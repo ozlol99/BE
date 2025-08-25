@@ -60,8 +60,6 @@ class UserLikeModel(models.Model):
     )
     created_at = fields.DatetimeField(auto_now_add=True)
 
-
-
     class Meta:
         table = "user_likes"
         unique_together = ("from_user", "to_user")  # 동일 유저가 한 번만 좋아요 가능
