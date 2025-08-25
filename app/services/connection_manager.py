@@ -40,7 +40,9 @@ class ConnectionManager:
             await websocket.close(code=status.WS_1000_NORMAL_CLOSURE)
             self.disconnect(room_id, user_id)
 
-    async def broadcast(self, message: dict, room_id: str, save_to_history: bool = True):
+    async def broadcast(
+        self, message: dict, room_id: str, save_to_history: bool = True
+    ):
         # Store message in history if requested
         if save_to_history:
             self.history[room_id].append(message)
