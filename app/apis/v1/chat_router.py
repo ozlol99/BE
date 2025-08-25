@@ -151,17 +151,19 @@ async def websocket_endpoint(
         return
 
     user_id = participant.user.id
-    await manager.connect(websocket, str(room_id), user_id)
-
-    join_message = {
-        "type": "user_join",
-        "user_id": user_id,
-        "username": participant.riot_account.game_name,
-        "timestamp": time.time(),
-    }
-    await manager.broadcast(join_message, str(room_id))
+    room_id_str = str(room_id)
+    await manager.connect(websocket, room_id_str, user_id)
 
     try:
+        # 사용자가 접속했으므로, 방의 최신 정보를 가져와서 전체에 브로드캐스트
+        room_details = await chat_service.get_chat_room_details(room_id)
+        update_message = {
+            "type": "participants_update",
+            "data": room_details.model_dump(),
+        }
+        await manager.broadcast(update_message, room_id_str, save_to_history=False)
+
+        # 기존 채팅 메시지 처리 로직
         while True:
             data = await websocket.receive_text()
             message = {
@@ -171,13 +173,16 @@ async def websocket_endpoint(
                 "content": data,
                 "timestamp": time.time(),
             }
-            await manager.broadcast(message, str(room_id))
+            await manager.broadcast(message, room_id_str, save_to_history=True)
+
     except WebSocketDisconnect:
-        manager.disconnect(str(room_id), user_id)
-        leave_message = {
-            "type": "user_leave",
-            "user_id": user_id,
-            "username": participant.riot_account.game_name,
-            "timestamp": time.time(),
+        # 사용자가 나갔으므로, 다시 방의 최신 정보를 가져와서 전체에 브로드캐스트
+        manager.disconnect(room_id_str, user_id)
+        room_details_after_leave = await chat_service.get_chat_room_details(room_id)
+        update_message_after_leave = {
+            "type": "participants_update",
+            "data": room_details_after_leave.model_dump(),
         }
-        await manager.broadcast(leave_message, str(room_id))
+        await manager.broadcast(
+            update_message_after_leave, room_id_str, save_to_history=False
+        )
