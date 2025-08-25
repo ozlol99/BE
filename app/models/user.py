@@ -27,8 +27,7 @@ class UserModel(models.Model):
         Social, null=False, description="소셜 계정 정보"
     )
     created_at = fields.DatetimeField(auto_now_add=True)
-    updated_at = fields.DatetimeField(auto_now=True)
-    last_profile_update = fields.DatetimeField(
+    updated_at = fields.DatetimeField(
         null=True, description="Last profile update timestamp"
     )
 
