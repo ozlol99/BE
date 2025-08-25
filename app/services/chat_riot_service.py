@@ -13,10 +13,6 @@ RIOT_API_KEY = settings.riot_api_key
 
 
 async def get_summoner_rank_info(puuid: str) -> Dict[str, Any]:
-    """
-    Fetches summoner's rank information (solo and flex) by their PUUID.
-    This logic is adapted from summoner_search_service.
-    """
     if not RIOT_API_KEY:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -56,10 +52,6 @@ async def get_summoner_rank_info(puuid: str) -> Dict[str, Any]:
 
 
 def get_tier_icon_url(tier: str) -> str:
-    """
-    Returns the URL for a tier icon.
-    (This is a placeholder, we might need a better way to get these URLs)
-    """
     if not tier or tier == "UNRANKED":
         return "/static/tiers/unranked.png"
     return f"/static/tiers/{tier.lower()}.png"
