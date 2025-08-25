@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
@@ -84,8 +85,27 @@ async def get_my_info(current_user: UserModel = Depends(get_current_user)):
 async def update_my_info(
     updated_info: UserUpdate, current_user: UserModel = Depends(get_current_user)
 ):
-    if updated_info.user:
-        current_user.user = updated_info.user
+    now = datetime.utcnow()
+    update_data = updated_info.model_dump(exclude_unset=True)
+
+    if not update_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="수정할 정보를 입력해주세요.",
+        )
+
+    if current_user.last_profile_update and (
+        now - current_user.last_profile_update < timedelta(hours=24)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="24시간 후에 다시 시도해주세요.",
+        )
+
+    for key, value in update_data.items():
+        setattr(current_user, key, value)
+
+    current_user.last_profile_update = now
     await current_user.save()
     return {"message": "사용자 정보가 성공적으로 업데이트되었습니다."}
 

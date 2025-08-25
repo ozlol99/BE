@@ -28,6 +28,9 @@ class UserModel(models.Model):
     )
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
+    last_profile_update = fields.DatetimeField(
+        null=True, description="Last profile update timestamp"
+    )
 
     riot_accounts: fields.ReverseRelation[RiotAccount]
 
