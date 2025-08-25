@@ -75,6 +75,8 @@ async def get_my_info(current_user: UserModel = Depends(get_current_user)):
         riot_accounts=[
             RiotAccountResponse.model_validate(acc) for acc in riot_accounts
         ],
+        birthday=current_user.birthday,
+        gender=current_user.gender,
     )
 
 
