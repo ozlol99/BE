@@ -40,13 +40,17 @@ class ConnectionManager:
             await websocket.close(code=status.WS_1000_NORMAL_CLOSURE)
             self.disconnect(room_id, user_id)
 
-    async def broadcast(self, message: dict, room_id: str):
-        # Store message in history before broadcasting
-        self.history[room_id].append(message)
+    async def broadcast(
+        self, message: dict, room_id: str, save_to_history: bool = True
+    ):
+        # Store message in history if requested
+        if save_to_history:
+            self.history[room_id].append(message)
 
         if room_id in self.active_connections:
+            message_str = json.dumps(message, ensure_ascii=False)
             for user_id, connection in self.active_connections[room_id].items():
-                await connection.send_text(json.dumps(message))
+                await connection.send_text(message_str)
 
     def get_active_user_count(self, room_id: str) -> int:
         if room_id in self.active_connections:

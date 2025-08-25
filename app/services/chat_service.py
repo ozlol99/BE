@@ -1,4 +1,3 @@
-import time
 from typing import Any, List, cast
 
 from fastapi import HTTPException, status
@@ -252,20 +251,10 @@ async def leave_chat_room(room_id: int, user: UserModel):
         ).prefetch_related("user", "riot_account")
 
         user_id_to_leave = participant.user.id
-        username_to_leave = participant.riot_account.game_name
 
         # Delete participant from DB and close their WebSocket
         await participant.delete()
         await manager.disconnect_user(str(room_id), user_id_to_leave)
-
-        # Broadcast a leave message to the room
-        leave_message = {
-            "type": "user_leave",
-            "user_id": user_id_to_leave,
-            "username": username_to_leave,
-            "timestamp": time.time(),
-        }
-        await manager.broadcast(leave_message, str(room_id))
 
     except DoesNotExist:
         raise HTTPException(
@@ -287,20 +276,10 @@ async def kick_participant(room_id: int, participant_id: int, owner: UserModel):
             )
 
         user_id_to_kick = participant_to_kick.user.id
-        username_to_kick = participant_to_kick.riot_account.game_name
 
         # Delete participant from DB and close their WebSocket
         await participant_to_kick.delete()
         await manager.disconnect_user(str(room_id), user_id_to_kick)
-
-        # Broadcast a leave message to the room
-        leave_message = {
-            "type": "user_leave",
-            "user_id": user_id_to_kick,
-            "username": username_to_kick,
-            "timestamp": time.time(),
-        }
-        await manager.broadcast(leave_message, str(room_id))
 
     except DoesNotExist:
         raise HTTPException(
