@@ -94,8 +94,8 @@ async def update_my_info(
             detail="수정할 정보를 입력해주세요.",
         )
 
-    if current_user.last_profile_update and (
-        now - current_user.last_profile_update < timedelta(hours=24)
+    if current_user.updated_at and (
+        now - current_user.updated_at < timedelta(hours=24)
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -105,7 +105,7 @@ async def update_my_info(
     for key, value in update_data.items():
         setattr(current_user, key, value)
 
-    current_user.last_profile_update = now
+    current_user.updated_at = now
     await current_user.save()
     return {"message": "사용자 정보가 성공적으로 업데이트되었습니다."}
 
