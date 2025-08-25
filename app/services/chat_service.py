@@ -26,7 +26,6 @@ from app.services.connection_manager import manager
 from app.utils.timestamp import format_time_ago_v2
 
 
-
 async def create_chat_room(room_data: ChatRoomCreate, owner: UserModel) -> ChatRoom:
     try:
         riot_account = await RiotAccount.get(id=room_data.riot_account_id, user=owner)
