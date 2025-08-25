@@ -70,6 +70,8 @@ async def get_my_info(current_user: UserModel = Depends(get_current_user)):
     return UserMeResponse(
         id=current_user.id,
         email=current_user.email,
+        birthday=current_user.birthday,
+        gender=current_user.gender,
         user=current_user.user,
         google_or_kakao=current_user.google_or_kakao,
         riot_accounts=[

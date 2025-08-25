@@ -8,7 +8,7 @@ from tortoise.exceptions import DoesNotExist
 
 from app.config.settings import Settings
 from app.models.search_summoner import RtSearchModel
-from app.utils.timestamp import format_time_ago
+from app.utils.timestamp import format_time_ago_v1
 
 if TYPE_CHECKING:
     pass
@@ -135,7 +135,6 @@ def get_match_info(match_id: str, puuid: str) -> Dict[str, Any]:
     participant = next(
         (p for p in info.get("participants", []) if p.get("puuid") == puuid), None
     )
-
     if not participant:
         raise ValueError(f"PUUID '{puuid}'을(를) 이 매치에서 찾을 수 없습니다.")
 
@@ -152,7 +151,7 @@ def get_match_info(match_id: str, puuid: str) -> Dict[str, Any]:
         "summoner_name": participant.get("riotIdGameName"),  # 추가
         "rank_type": QUEUE_TYPE_MAP.get(info.get("queueId"), "알 수 없는 랭크"),
         "win": participant.get("win"),  # 👈 승패 정보 추가
-        "game_end_timestamp": str(format_time_ago(info.get("gameEndTimestamp"))),
+        "game_end_timestamp": str(format_time_ago_v1(info.get("gameEndTimestamp"))),
         "play_duration": str(int(info.get("gameDuration") / 60)) + "분",
         "kda": {
             "kills": kills,
@@ -177,7 +176,7 @@ def get_match_info(match_id: str, puuid: str) -> Dict[str, Any]:
         "champion_name": participant.get("championName"),
     }
     if info.get("queueId") in [420, 430, 440]:
-        processed_data["position"] = participant.get("role")
+        processed_data["position"] = participant.get("teamPosition")
     return processed_data
 
 
@@ -250,9 +249,13 @@ async def get_recent_matches(
     else:
         avg_kda = total_kills + total_assists
 
-    most_played_position = max(
-        position_counts, key=lambda positions: position_counts[positions]
-    )
+    if position_counts:
+        most_played_position = max(
+            position_counts, key=lambda positions: position_counts[positions]
+        )
+    else:
+        # 포지션 데이터가 없는 경우, 기본값 설정
+        most_played_position = "NONE"
 
     summary = {
         "총 매치 수": total_games,
