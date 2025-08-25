@@ -1,4 +1,3 @@
-import time
 from typing import Any, List, cast
 
 from fastapi import HTTPException, status
@@ -251,6 +250,8 @@ async def leave_chat_room(room_id: int, user: UserModel):
             room_id=room_id, user=user
         ).prefetch_related("user", "riot_account")
 
+        user_id_to_leave = participant.user.id
+
         # Delete participant from DB and close their WebSocket
         await participant.delete()
         await manager.disconnect_user(str(room_id), user_id_to_leave)
@@ -273,6 +274,8 @@ async def kick_participant(room_id: int, participant_id: int, owner: UserModel):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Owner cannot kick themselves.",
             )
+
+        user_id_to_kick = participant_to_kick.user.id
 
         # Delete participant from DB and close their WebSocket
         await participant_to_kick.delete()
